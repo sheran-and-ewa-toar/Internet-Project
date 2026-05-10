@@ -1,0 +1,10 @@
+[
+  {
+    "modelId": 1,
+    "modelName": "Random Forest",
+    "featureSet": "3D",
+    "accuracy": 0.81,
+    "createdBy": 1,
+    "createDate": "2026-05-10T12:00:00Z"
+  }
+]

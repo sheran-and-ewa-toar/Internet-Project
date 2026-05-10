@@ -1,0 +1,26 @@
+[
+  {
+    "userId": 1,
+    "firstName": "Ewa",
+    "lastName": "Yo",
+    "userRole": "admin",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-05-10T12:00:00Z"
+  },
+{
+    "userId": 2,
+    "firstName": "Sheran",
+    "lastName": "Smol",
+    "userRole": "admin",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-05-10T12:00:00Z"
+  },
+  {
+    "userId": 3,
+    "firstName": "Jeff",
+    "lastName": "Geff",
+    "userRole": "user",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-05-10T12:00:00Z"
+  }
+]
