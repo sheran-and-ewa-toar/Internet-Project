@@ -1,0 +1,51 @@
+[
+  {
+    "featureSetId": 1,
+    "name": "Sequence Features",
+    "shortName": "1D",
+    "featureCount": 280,
+    "description": "Features extracted from nucleotide sequences"
+  },
+  {
+    "featureSetId": 2,
+    "name": "Secondary Features",
+    "shortName": "2D",
+    "featureCount": 58,
+    "description": "Features extracted from secondary structures of miRNAs"
+  },  
+  {
+    "featureSetId": 3,
+    "name": "3D Structural Features",
+    "shortName": "3D",
+    "featureCount": 57,
+    "description": "Features extracted from miRNA 3D structures"
+  },
+  {
+    "featureSetId": 4,
+    "name": "Sequence and Secondary Features",
+    "shortName": "1D+2D",
+    "featureCount": 338,
+    "description": "Features extracted from nucleotide sequences and secondary structures"
+  },  
+  {
+    "featureSetId": 5,
+    "name": "Sequence and Tertiary Features",
+    "shortName": "1D+3D",
+    "featureCount": 337,
+    "description": "Features extracted from nucleotide sequences and tertiary structures"
+  },  
+  {
+    "featureSetId": 6,
+    "name": "Secondary and Tertiary Features",
+    "shortName": "2D+3D",
+    "featureCount": 115,
+    "description": "Features extracted from secondary and tertiary structures"
+  },    
+  {
+    "featureSetId": 7,
+    "name": "Combined Features",
+    "shortName": "All",
+    "featureCount": 395,
+    "description": "Combination of features derived from sequence, secondary and tertiary structures"
+  }
+]
