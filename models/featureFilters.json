@@ -1,0 +1,20 @@
+[
+  {
+    "filterId": 1,
+    "name": "Pearson Correlation",
+    "shortName": "pearson",
+    "description": "Removes highly correlated features"
+  },
+  {
+    "filterId": 2,
+    "name": "Variance Threshold",
+    "shortName": "variance",
+    "description": "Removes low-variance features"
+  },
+  {
+    "filterId": 3,
+    "name": "Principal Component Analysis",
+    "shortName": "pca",
+    "description": "Dimensionality reduction technique"
+  }
+]
