@@ -39,7 +39,7 @@ router.put(
     '/:job_id',
     validateParams(['job_id']),
     authorizeRoles.isAuthenticated,
-    authorizeRoles(['manager', 'admin']),
+    authorizeRoles(['user','manager', 'admin']),
     validateBody(['title', 'notes']),
     updateJobById
 );

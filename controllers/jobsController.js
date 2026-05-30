@@ -73,6 +73,12 @@ const updateJobById = (req, res) => {
         return res.status(404).json(error('NOT_FOUND', 'Job not found'));
     }
 
+    if (req.userRole === 'user' && req.userId !== job.userId) {
+        return res.status(403).json(
+            error('FORBIDDEN', 'You do not have permission to perform this action.')
+        );
+    }
+
     const { title, notes } = req.body;
 
     job.title = title;
