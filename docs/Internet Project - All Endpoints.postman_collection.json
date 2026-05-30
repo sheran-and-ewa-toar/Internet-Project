@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "ffe30682-6e4b-477f-baf9-fb4a58c39941",
+    "_postman_id": "dd3e8502-e789-4137-9d02-35e0bd272d95",
     "name": "Internet Project - All Endpoints",
     "description": "Single Postman collection with example requests for Users, Models, Model Types, Feature Sets, and Feature Filters.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53315180",
-    "_collection_link": "https://go.postman.co/collection/53315180-ffe30682-6e4b-477f-baf9-fb4a58c39941?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53315180-dd3e8502-e789-4137-9d02-35e0bd272d95?source=collection_link"
   },
   "item": [
     {
@@ -104,7 +104,76 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Create User valid",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"userRole\": \"user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "Create User Missing Field",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userRole\": \"user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
         },
         {
           "name": "Update User",
@@ -151,7 +220,210 @@
             },
             "description": "Replace `1` with the userId to update"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update User Admin",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-user-id",
+                    "value": "1"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "admin"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Banaranga\",\n  \"userRole\": \"user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users/:id",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "3"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "Self Update User fail",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-user-id",
+                    "value": "3"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "user"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Jones\",\n  \"userRole\": \"admin\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users/:id",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "3"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "Self Update User",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-user-id",
+                    "value": "3"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "user"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Jones\",\n  \"userRole\": \"user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users/:id",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "3"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [
+                {
+                  "expires": "Invalid Date",
+                  "domain": "",
+                  "path": ""
+                }
+              ],
+              "body": ""
+            },
+            {
+              "name": "Update User manager",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-user-id",
+                    "value": "4"
+                  },
+                  {
+                    "key": "x-user-role",
+                    "value": "manager"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Jones\",\n  \"userRole\": \"admin\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/users/:id",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "3"
+                    }
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": [],
+              "cookie": [],
+              "body": ""
+            }
+          ]
         },
         {
           "name": "DELETE User",
@@ -201,7 +473,7 @@
                   "variable": [
                     {
                       "key": "id",
-                      "value": "6"
+                      "value": "4"
                     }
                   ]
                 }
@@ -219,6 +491,11 @@
                   {
                     "key": "x-user-role",
                     "value": "admin"
+                  },
+                  {
+                    "key": "x-user-id",
+                    "value": "1",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -233,7 +510,7 @@
                   "variable": [
                     {
                       "key": "id",
-                      "value": "6"
+                      "value": "4"
                     }
                   ]
                 }
@@ -250,27 +527,6 @@
               "body": ""
             }
           ]
-        },
-        {
-          "name": "User by ID",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{url}}/users/1",
-              "host": [
-                "{{url}}"
-              ],
-              "path": [
-                "users",
-                "1"
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
@@ -291,7 +547,7 @@
               },
               {
                 "key": "x-user-role",
-                "value": "user"
+                "value": "admin"
               }
             ],
             "body": {
@@ -321,7 +577,7 @@
               },
               {
                 "key": "x-user-role",
-                "value": "user"
+                "value": "admin"
               }
             ],
             "url": {
@@ -336,7 +592,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "1"
+                  "value": "2"
                 }
               ]
             },
@@ -395,7 +651,7 @@
               },
               {
                 "key": "x-user-role",
-                "value": "manager"
+                "value": "admin"
               }
             ],
             "body": {
@@ -419,7 +675,7 @@
               "variable": [
                 {
                   "key": "job_id",
-                  "value": "1"
+                  "value": "2"
                 }
               ]
             },
@@ -434,7 +690,7 @@
             "header": [
               {
                 "key": "x-user-id",
-                "value": "1"
+                "value": "2"
               },
               {
                 "key": "x-user-role",
@@ -453,7 +709,7 @@
               "variable": [
                 {
                   "key": "job_id",
-                  "value": "1"
+                  "value": "3"
                 }
               ]
             },
@@ -605,14 +861,6 @@
           "response": []
         }
       ]
-    },
-    {
-      "name": "New Request",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
     }
   ],
   "event": [
