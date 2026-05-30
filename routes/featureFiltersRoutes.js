@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
+const { validateParams } = require('../middleware/validationMiddleware');
 const {
     getAllFeatureFilters,
     getFeatureFilterById
@@ -9,6 +10,6 @@ const {
 
 router.get('/', getAllFeatureFilters);
 
-router.get('/:id', getFeatureFilterById);
+router.get('/:id', validateParams(['id']), getFeatureFilterById);
 
 module.exports = router;

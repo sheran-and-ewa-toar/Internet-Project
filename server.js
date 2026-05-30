@@ -9,10 +9,12 @@ const featureSetsRoutes = require('./routes/featureSetsRoutes');
 const featureFiltersRoutes = require('./routes/featureFiltersRoutes');
 
 const loggerMiddleware = require('./middleware/loggerMiddleware');
+const authMiddleware = require('./middleware/authMiddleware');
 
 app.use(express.json());
 
 app.use(loggerMiddleware);
+app.use(authMiddleware.attachUserContext);
 
 app.use('/users', usersRoutes);
 app.use('/jobs', jobsRoutes);

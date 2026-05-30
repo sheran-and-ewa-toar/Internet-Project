@@ -114,6 +114,14 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              },
+              {
+                "key": "x-user-role",
+                "value": "admin"
               }
             ],
             "body": {
@@ -126,7 +134,20 @@
               }
             },
             "url": {
-              "raw": ""
+              "raw": "{{url}}/users/:id",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
             },
             "description": "Replace `1` with the userId to update"
           },
@@ -140,6 +161,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
               },
               {
                 "key": "x-user-role",
@@ -259,7 +284,16 @@
           },
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "x-user-id",
+                "value": "1"
+              },
+              {
+                "key": "x-user-role",
+                "value": "user"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": ""
@@ -280,7 +314,16 @@
           "name": "Job by ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "x-user-id",
+                "value": "1"
+              },
+              {
+                "key": "x-user-role",
+                "value": "user"
+              }
+            ],
             "url": {
               "raw": "{{url}}/jobs/:id",
               "host": [
@@ -338,20 +381,83 @@
           "response": []
         },
         {
-          "name": "Jobs CSV Download",
+          "name": "Update Job",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-id",
+                "value": "1"
+              },
+              {
+                "key": "x-user-role",
+                "value": "manager"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"notes\": \"Updated notes for the job.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "{{url}}/jobs/download",
+              "raw": "{{url}}/jobs/:job_id",
               "host": [
                 "{{url}}"
               ],
               "path": [
                 "jobs",
-                "download"
+                ":job_id"
+              ],
+              "variable": [
+                {
+                  "key": "job_id",
+                  "value": "1"
+                }
               ]
-            }
+            },
+            "description": "Requires manager or admin role"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-user-id",
+                "value": "1"
+              },
+              {
+                "key": "x-user-role",
+                "value": "admin"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/jobs/:job_id",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "jobs",
+                ":job_id"
+              ],
+              "variable": [
+                {
+                  "key": "job_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Requires admin role"
           },
           "response": []
         }
