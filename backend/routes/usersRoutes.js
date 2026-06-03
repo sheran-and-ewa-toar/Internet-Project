@@ -11,8 +11,8 @@ const {
 
 const {
     getAllUsers,
+    getCurrentUser,    
     getUserById,
-    getCurrentUser,
     createUser,
     updateUser,
     deleteUser
@@ -20,13 +20,13 @@ const {
 
 router.get('/', getAllUsers);
 
-router.get('/:id', validateParams(['id']), getUserById);
-
 router.get(
     '/me',
     authMiddleware.isAuthenticated,
     getCurrentUser
 );
+
+router.get('/:id', validateParams(['id']), getUserById);
 
 router.post('/', validateBody(['firstName', 'lastName', 'userRole']), createUser);
 

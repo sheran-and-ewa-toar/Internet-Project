@@ -5,19 +5,6 @@ const getAllUsers = (req, res) => {
     res.status(200).json(success(users));
 };
 
-const getUserById = (req, res) => {
-
-    const id = parseInt(req.params.id);
-
-    const user = users.find((u) => u.userId === id);
-
-    if (!user) {
-        return res.status(404).json(error('NOT_FOUND', 'User not found'));
-    }
-
-    res.status(200).json(success(user));
-};
-
 const getCurrentUser = (req, res) => {
 
     const userId = req.userId;
@@ -35,6 +22,19 @@ const getCurrentUser = (req, res) => {
     res.status(200).json(
         success(user)
     );
+};
+
+const getUserById = (req, res) => {
+
+    const id = parseInt(req.params.id);
+
+    const user = users.find((u) => u.userId === id);
+
+    if (!user) {
+        return res.status(404).json(error('NOT_FOUND', 'User not found'));
+    }
+
+    res.status(200).json(success(user));
 };
 
 const createUser = (req, res) => {
@@ -137,8 +137,8 @@ const deleteUser = (req, res) => {
 
 module.exports = {
     getAllUsers,
-    getUserById,
     getCurrentUser,
+    getUserById,
     createUser,
     updateUser,
     deleteUser

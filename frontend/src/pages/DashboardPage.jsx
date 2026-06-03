@@ -1,80 +1,60 @@
 import { useEffect, useState } from "react";
-
 import api from "../services/api";
-
 import Card from "../components/Card";
-import DataTable from "../components/DataTable";
+
+console.log("DASHBOARD RENDERED");
 
 export default function Dashboard() {
-
     const [jobs, setJobs] = useState([]);
-    const [featureSets, setFeatureSets] = useState([]);
-    const [filters, setFilters] = useState([]);
-
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-
-        const loadData = async () => {
-
+        const fetchJobs = async () => {
             try {
+                setLoading(true);
 
-                const jobsRes =
-                    await api.get("/api/jobs");
+                const res = await api.get("/api/jobs");
 
-                const featureSetsRes =
-                    await api.get("/api/feature-sets");
-
-                const filtersRes =
-                    await api.get("/api/feature-filters");
-
-                setJobs(jobsRes.data.data);
-                setFeatureSets(featureSetsRes.data.data);
-                setFilters(filtersRes.data.data);
-
+                setJobs(res.data.data || []);
             } catch (err) {
-                console.error(err);
+                setError("Failed to load jobs");
             } finally {
                 setLoading(false);
             }
         };
 
-        loadData();
-
+        fetchJobs();
     }, []);
 
-    if (loading) {
-        return <h2>Loading...</h2>;
-    }
+    if (loading) return <p>Loading dashboard...</p>;
+    if (error) return <p style={{ color: "red" }}>{error}</p>;
+
+    // last 3 jobs (most recent first)
+    const recentJobs = [...jobs]
+        .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
+        .slice(0, 3);
 
     return (
-        <div style={{ padding: "20px" }}>
+        <div>
+            <h2>Your Recent Training Runs</h2>
 
-            <h1>Model Training Dashboard</h1>
-
-            <div style={{ display: "flex" }}>
-
-                <Card
-                    title="Training Jobs"
-                    value={jobs.length}
-                />
-
-                <Card
-                    title="Feature Sets"
-                    value={featureSets.length}
-                />
-
-                <Card
-                    title="Filters"
-                    value={filters.length}
-                />
-
-            </div>
-
-            <h2>Recent Jobs</h2>
-
-            <DataTable jobs={jobs} />
-
+            {recentJobs.length === 0 ? (
+                <p>No training runs found</p>
+            ) : (
+                recentJobs.map(job => (
+                    <Card
+                        key={job.jobId}
+                        title={`Job #${job.jobId} (Model ${job.modelTypeId})`}
+                        featureSetId={job.featureSetId}
+                        accuracy={job.accuracy}
+                        precision={job.precision}
+                        recall={job.recall}
+                        f1Score={job.f1Score}
+                        date={job.createDate}
+                    />
+                ))
+            )}
         </div>
     );
 }
