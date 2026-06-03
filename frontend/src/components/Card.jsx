@@ -1,8 +1,16 @@
-export default function Card({ title, description }) {
+export default function Card({ title, value }) {
     return (
-        <div style={{ border: "1px solid black", margin: 10 }}>
+        <div
+            style={{
+                border: "1px solid #ccc",
+                padding: "16px",
+                margin: "10px",
+                borderRadius: "8px",
+                minWidth: "180px"
+            }}
+        >
             <h3>{title}</h3>
-            <p>{description}</p>
+            <h2>{value}</h2>
         </div>
     );
 }

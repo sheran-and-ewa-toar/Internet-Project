@@ -1,31 +1,31 @@
-export default function DataTable({ data }) {
+export default function DataTable({ jobs }) {
 
-    if (!data || data.length === 0) {
-        return <p>No data available</p>;
+    if (!jobs.length) {
+        return <p>No training jobs found.</p>;
     }
 
     return (
-        <table border="1">
+        <table border="1" cellPadding="8">
             <thead>
                 <tr>
-                    {Object.keys(data[0]).map((header) => (
-                        <th key={header}>{header}</th>
-                    ))}
+                    <th>Job ID</th>
+                    <th>Feature Set</th>
+                    <th>Model Type</th>
+                    <th>Filter</th>
+                    <th>Accuracy</th>
                 </tr>
             </thead>
 
             <tbody>
-                {data.map((row, i) => {
-                    const rowKey = row.id ?? row.jobId ?? `row-${i}`;
-
-                    return (
-                        <tr key={rowKey}>
-                            {Object.entries(row).map(([columnKey, value]) => (
-                                <td key={columnKey}>{value}</td>
-                            ))}
-                        </tr>
-                    );
-                })}
+                {jobs.map(job => (
+                    <tr key={job.jobId}>
+                        <td>{job.jobId}</td>
+                        <td>{job.featureSetId}</td>
+                        <td>{job.modelTypeId}</td>
+                        <td>{job.filterId}</td>
+                        <td>{job.accuracy}</td>
+                    </tr>
+                ))}
             </tbody>
         </table>
     );

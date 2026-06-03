@@ -1,26 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 
 export default function Navbar() {
 
     const [user, setUser] = useState(null);
-
     const navigate = useNavigate();
 
     useEffect(() => {
 
         const fetchUser = async () => {
-
             try {
-
                 const res = await api.get("/api/users/me");
-
                 setUser(res.data.data);
-
-            } catch {
-
+            } catch (err) {
+                console.error("Failed to load user", err);
                 setUser(null);
             }
         };
@@ -30,18 +24,19 @@ export default function Navbar() {
     }, []);
 
     const logout = async () => {
-
         try {
-
             await api.post("/api/auth/logout");
 
-        } catch {
+            localStorage.removeItem("userId");
+            localStorage.removeItem("userRole");
 
+            setUser(null);
+
+            navigate("/login");
+
+        } catch (err) {
+            console.error("Logout failed", err);
         }
-
-        localStorage.clear();
-
-        navigate("/login");
     };
 
     return (
@@ -49,32 +44,38 @@ export default function Navbar() {
             style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "10px"
+                alignItems: "center",
+                padding: "10px 20px",
+                borderBottom: "1px solid #ddd"
             }}
         >
-            <h3>miRNA Model Trainer</h3>
 
-            <div>
+            {/* LEFT: Logo / Project Name */}
+            <div style={{ fontWeight: "bold" }}>
+                ML Training Platform
+            </div>
+
+            {/* CENTER: Navigation */}
+            <div style={{ display: "flex", gap: "15px" }}>
                 <Link to="/dashboard">Dashboard</Link>
-                {" | "}
                 <Link to="/settings">Settings</Link>
             </div>
 
-            <div>
+            {/* RIGHT: User + Logout */}
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
 
                 {user && (
                     <span>
-                        {user.firstName} {user.lastName}
+                        👤 {user.firstName}
                     </span>
                 )}
-
-                {" "}
 
                 <button onClick={logout}>
                     Logout
                 </button>
 
             </div>
+
         </nav>
     );
 }

@@ -1,43 +1,39 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/LoginPage";
 import Dashboard from "./pages/DashboardPage";
 import Settings from "./pages/SettingsPage";
+
 import Layout from "./components/Layout";
 
+function isLoggedIn() {
+    return !!localStorage.getItem("userId");
+}
+
 export default function App() {
-
-    const isLoggedIn = localStorage.getItem("userId");
-
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Login />} />
+
+                {/* public route */}
                 <Route path="/login" element={<Login />} />
+
+                {/* protected routes */}
                 <Route
-                    path="/dashboard"
+                    path="/"
                     element={
-                        isLoggedIn ? (
-                            <Layout>
-                                <Dashboard />
-                            </Layout>
+                        isLoggedIn() ? (
+                            <Layout />
                         ) : (
-                            <Login />
+                            <Navigate to="/login" />
                         )
                     }
-                />
-                <Route
-                    path="/settings"
-                    element={
-                        isLoggedIn ? (
-                            <Layout>
-                                <Settings />
-                            </Layout>
-                        ) : (
-                            <Login />
-                        )
-                    }
-                />
+                >
+                    <Route index element={<Dashboard />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="settings" element={<Settings />} />
+                </Route>
+
             </Routes>
         </BrowserRouter>
     );

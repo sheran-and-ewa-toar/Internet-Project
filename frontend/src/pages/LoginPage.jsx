@@ -70,6 +70,7 @@ export default function Login() {
             );
 
             navigate("/dashboard");
+            window.location.reload();
 
         } catch (err) {
 
