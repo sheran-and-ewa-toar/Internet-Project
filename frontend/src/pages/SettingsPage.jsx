@@ -5,21 +5,65 @@ export default function Settings() {
 
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     useEffect(() => {
-        api("/api/settings")
-            .then(res => setSettings(res.data))
+        api
+            .get("/api/settings")
+            .then((res) => setSettings(res.data))
+            .catch(() => setError("Unable to load settings."))
             .finally(() => setLoading(false));
     }, []);
 
-    const updateSetting = async () => {
+    const validateSettings = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        await api("/api/settings", {
-            method: "PUT",
-            body: JSON.stringify(settings)
-        });
+        if (!settings.username?.trim()) {
+            return "Username is required.";
+        }
 
-        alert("Settings updated");
+        if (!settings.email?.trim()) {
+            return "Email is required.";
+        }
+
+        if (!emailRegex.test(settings.email)) {
+            return "Please enter a valid email address.";
+        }
+
+        if (!settings.theme?.trim()) {
+            return "Theme selection cannot be empty.";
+        }
+
+        return null;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        setError("");
+        setSuccess("");
+
+        const validationError = validateSettings();
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            await api.put("/api/settings", settings);
+
+            setSuccess("Settings updated successfully.");
+        } catch (err) {
+            setError(
+                err.response?.data?.error?.message ||
+                    "Unable to save settings. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (loading) return <p>Loading...</p>;
@@ -28,30 +72,71 @@ export default function Settings() {
         <div>
             <h2>Settings</h2>
 
-            <input
-                value={settings.username || ""}
-                onChange={(e) =>
-                    setSettings({ ...settings, username: e.target.value })
-                }
-            />
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="settings-username">Username</label>
+                    <input
+                        id="settings-username"
+                        type="text"
+                        value={settings.username || ""}
+                        onChange={(e) =>
+                            setSettings({
+                                ...settings,
+                                username: e.target.value,
+                            })
+                        }
+                        placeholder="Enter username"
+                    />
+                </div>
 
-            <input
-                value={settings.email || ""}
-                onChange={(e) =>
-                    setSettings({ ...settings, email: e.target.value })
-                }
-            />
+                <div>
+                    <label htmlFor="settings-email">Email</label>
+                    <input
+                        id="settings-email"
+                        type="email"
+                        value={settings.email || ""}
+                        onChange={(e) =>
+                            setSettings({
+                                ...settings,
+                                email: e.target.value,
+                            })
+                        }
+                        placeholder="Enter email"
+                    />
+                </div>
 
-            <input
-                value={settings.theme || ""}
-                onChange={(e) =>
-                    setSettings({ ...settings, theme: e.target.value })
-                }
-            />
+                <div>
+                    <label htmlFor="settings-theme">Theme</label>
+                    <input
+                        id="settings-theme"
+                        type="text"
+                        value={settings.theme || ""}
+                        onChange={(e) =>
+                            setSettings({
+                                ...settings,
+                                theme: e.target.value,
+                            })
+                        }
+                        placeholder="Preferred theme"
+                    />
+                </div>
 
-            <button onClick={updateSetting}>
-                Save
-            </button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Saving..." : "Save Settings"}
+                </button>
+            </form>
+
+            {error && (
+                <p style={{ color: "#b00020", marginTop: "14px" }}>
+                    {error}
+                </p>
+            )}
+
+            {success && (
+                <p style={{ color: "#2a7f3d", marginTop: "14px" }}>
+                    {success}
+                </p>
+            )}
         </div>
     );
 }

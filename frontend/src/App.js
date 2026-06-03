@@ -3,9 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/LoginPage";
 import Dashboard from "./pages/DashboardPage";
 import Settings from "./pages/SettingsPage";
-
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Layout from "./components/Layout";
 
 export default function App() {
 
@@ -13,18 +11,34 @@ export default function App() {
 
     return (
         <BrowserRouter>
-
-            {isLoggedIn && <Navbar />}
-
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        isLoggedIn ? (
+                            <Layout>
+                                <Dashboard />
+                            </Layout>
+                        ) : (
+                            <Login />
+                        )
+                    }
+                />
+                <Route
+                    path="/settings"
+                    element={
+                        isLoggedIn ? (
+                            <Layout>
+                                <Settings />
+                            </Layout>
+                        ) : (
+                            <Login />
+                        )
+                    }
+                />
             </Routes>
-
-            {isLoggedIn && <Footer />}
-
         </BrowserRouter>
     );
 }
