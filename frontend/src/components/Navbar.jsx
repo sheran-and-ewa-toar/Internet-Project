@@ -1,47 +1,80 @@
 import { useEffect, useState } from "react";
-import { api } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import api from "../services/api";
 
 export default function Navbar() {
 
     const [user, setUser] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
-        api("/api/users/me", {
-            headers: {
-                Authorization: localStorage.getItem("token")
+
+        const fetchUser = async () => {
+
+            try {
+
+                const res = await api.get("/api/users/me");
+
+                setUser(res.data.data);
+
+            } catch {
+
+                setUser(null);
             }
-        })
-        .then(res => setUser(res.data))
-        .catch(() => setUser(null));
+        };
+
+        fetchUser();
+
     }, []);
 
     const logout = async () => {
-        await api("/api/auth/logout", {
-            method: "POST",
-            headers: {
-                Authorization: localStorage.getItem("token")
-            }
-        });
 
-        localStorage.removeItem("token");
+        try {
+
+            await api.post("/api/auth/logout");
+
+        } catch {
+
+        }
+
+        localStorage.clear();
+
         navigate("/login");
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <h3>ML Project</h3>
+        <nav
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "10px"
+            }}
+        >
+            <h3>miRNA Model Trainer</h3>
 
             <div>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/settings">Settings</a>
+                <Link to="/dashboard">Dashboard</Link>
+                {" | "}
+                <Link to="/settings">Settings</Link>
             </div>
 
             <div>
-                {user?.firstName && <span>{user.firstName}</span>}
-                <button onClick={logout}>Logout</button>
+
+                {user && (
+                    <span>
+                        {user.firstName} {user.lastName}
+                    </span>
+                )}
+
+                {" "}
+
+                <button onClick={logout}>
+                    Logout
+                </button>
+
             </div>
-        </div>
+        </nav>
     );
 }

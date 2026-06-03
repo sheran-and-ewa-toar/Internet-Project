@@ -1,19 +1,23 @@
-const BASE_URL = "http://localhost:3000";
+import axios from 'axios';
 
-export const api = async (endpoint, options = {}) => {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: {
-            "Content-Type": "application/json",
-            ...options.headers
-        },
-        ...options
-    });
+const api = axios.create({
+    baseURL: 'http://localhost:3000'
+});
 
-    const data = await response.json();
+api.interceptors.request.use((config) => {
 
-    if (!response.ok) {
-        throw data;
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+
+    if (userId) {
+        config.headers['x-user-id'] = userId;
     }
 
-    return data;
-};
+    if (userRole) {
+        config.headers['x-user-role'] = userRole;
+    }
+
+    return config;
+});
+
+export default api;
