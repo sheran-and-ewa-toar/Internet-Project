@@ -48,7 +48,6 @@ export default function Login() {
             );
 
             navigate("/dashboard");
-            window.location.reload();
         } catch (err) {
             setError(
                 err.response?.data?.error?.message || "Login failed"

@@ -1,19 +1,52 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import api from "../services/api";
 import "../styles/Settings.css";
 
+const themeOptions = [
+    { value: "light", label: "Default (Light)" },
+    { value: "dark", label: "Dark" },
+    { value: "pink", label: "Creator's Preference #1" },
+    { value: "teal", label: "Creator's Preference #2" }
+];
+
 export default function Settings() {
+    const { theme: savedTheme, setTheme: setAppTheme } = useOutletContext();
+
     const [settings, setSettings] = useState({});
+    const [originalSettings, setOriginalSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     useEffect(() => {
-        api.get("/api/settings")
-            .then((res) => setSettings(res.data))
-            .catch(() => setError("Unable to load settings."))
-            .finally(() => setLoading(false));
-    }, []);
+        const fetchSettings = async () => {
+            try {
+                setError("");
+                
+                const res = await api.get("/api/settings");
+                
+                const backendData = res.data?.data || res.data;
+                const loadedTheme = backendData.theme || "light";
+
+                const nextSettings = {
+                    username: backendData.username || "",
+                    email: backendData.email || "",
+                    theme: loadedTheme
+                };
+
+                setSettings(nextSettings);
+                setOriginalSettings(nextSettings);
+                setAppTheme?.(loadedTheme);
+            } catch (err) {
+                setError("Unable to load initial settings profile.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSettings();
+    }, [setAppTheme]);
 
     const validateSettings = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,12 +71,23 @@ export default function Settings() {
             return;
         }
 
+        const noChange =
+            settings.username === originalSettings.username &&
+            settings.email === originalSettings.email &&
+            settings.theme === originalSettings.theme;
+
+        if (noChange) {
+            setSuccess("No changes were made.");
+            return;
+        }
+
         try {
             setLoading(true);
 
             await api.put("/api/settings", settings);
-
+            setOriginalSettings(settings);
             setSuccess("Settings updated successfully.");
+            setAppTheme?.(settings.theme);
         } catch (err) {
             setError(
                 err.response?.data?.error?.message ||
@@ -91,14 +135,21 @@ export default function Settings() {
                     </div>
 
                     <div className="form-group">
-                        <label>Theme</label>
-                        <input
-                            type="text"
-                            value={settings.theme || ""}
-                            onChange={(e) =>
-                                setSettings({ ...settings, theme: e.target.value })
-                            }
-                        />
+                        <label htmlFor="settings-theme">Theme</label>
+                        <select
+                            id="settings-theme"
+                            value={settings.theme || savedTheme || "light"}
+                            onChange={(e) => {
+                                const nextTheme = e.target.value;
+                                setSettings({ ...settings, theme: nextTheme });
+                            }}
+                        >
+                            {themeOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <button disabled={loading}>

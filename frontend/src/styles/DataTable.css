@@ -2,8 +2,8 @@
     margin-top: 20px;
     overflow-x: auto;
     border-radius: 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    background: white;
+    box-shadow: var(--card-shadow);
+    background: var(--surface);
 }
 
 .data-table {
@@ -11,11 +11,12 @@
     border-collapse: collapse;
     font-size: 14px;
     min-width: 900px;
+    color: var(--text);
 }
 
 .data-table thead {
-    background: linear-gradient(90deg, #0f766e, #14b8a6);
-    color: white;
+    background: var(--primary);
+    color: var(--primary-foreground);
 }
 
 .data-table th {
@@ -27,25 +28,25 @@
 
 .data-table td {
     padding: 12px;
-    border-bottom: 1px solid #eee;
-    color: #333;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
 }
 
 .data-table tbody tr:hover {
-    background-color: #f6fffb;
+    background-color: var(--surface-alt);
     transition: 0.2s;
 }
 
 .job-id {
     font-weight: bold;
-    color: #0f766e;
+    color: var(--primary);
 }
 
 .table-empty {
     padding: 20px;
-    background: #f9fafb;
-    border: 1px dashed #ccc;
+    background: var(--surface-alt);
+    border: 1px dashed var(--border);
     border-radius: 10px;
-    color: #666;
+    color: var(--muted);
     margin-top: 12px;
 }

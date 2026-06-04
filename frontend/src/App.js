@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/LoginPage";
@@ -6,11 +7,24 @@ import Settings from "./pages/SettingsPage";
 import CreateJob from "./pages/CreateJob";
 import Layout from "./components/Layout";
 
+const themeOptions = ["light", "dark", "pink", "teal"];
+
 function isLoggedIn() {
     return !!localStorage.getItem("userId");
 }
 
 export default function App() {
+    const [theme, setTheme] = useState(() => {
+        const saved = localStorage.getItem("appTheme");
+        return themeOptions.includes(saved) ? saved : "light";
+    });
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
+        localStorage.setItem("appTheme", theme);
+    }, [theme]);
+
     return (
         <BrowserRouter>
             <Routes>
@@ -23,7 +37,7 @@ export default function App() {
                     path="/"
                     element={
                         isLoggedIn() ? (
-                            <Layout />
+                            <Layout theme={theme} setTheme={setTheme} />
                         ) : (
                             <Navigate to="/login" />
                         )

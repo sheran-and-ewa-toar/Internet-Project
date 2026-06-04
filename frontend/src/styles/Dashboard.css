@@ -4,20 +4,15 @@
 }
 
 .dashboard-header {
-    background: linear-gradient(
-        135deg,
-        #0f766e,
-        #155e75
-    );
-
-    color: white;
+    background: var(--header-gradient);
+    color: var(--primary-foreground);
 
     padding: 32px;
     border-radius: 16px;
 
     margin-bottom: 30px;
 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: var(--card-shadow);
 }
 
 .dashboard-header h1 {
@@ -33,7 +28,7 @@
 }
 
 .dashboard-section h2 {
-    color: #134e4a;
+    color: var(--text);
     margin-bottom: 20px;
 }
 
@@ -46,13 +41,19 @@
     gap: 20px;
 }
 
+.jobs-count {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
 .empty-state {
     padding: 25px;
     text-align: center;
 
-    background: white;
+    background: var(--surface);
 
     border-radius: 12px;
 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    box-shadow: var(--card-shadow);
 }

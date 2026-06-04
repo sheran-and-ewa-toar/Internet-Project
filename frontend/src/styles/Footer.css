@@ -3,17 +3,17 @@
     padding: 20px;
     text-align: center;
 
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border);
 
-    background: white;
-    color: #6b7280;
+    background: var(--surface);
+    color: var(--muted);
 
     font-size: 14px;
 }
 
 .footer-title {
     font-weight: 600;
-    color: #374151;
+    color: var(--text);
 }
 
 .footer-year {
@@ -23,5 +23,5 @@
 .footer-slogan {
     margin-top: 6px;
     font-style: italic;
-    color: #9ca3af;
+    color: var(--muted);
 }

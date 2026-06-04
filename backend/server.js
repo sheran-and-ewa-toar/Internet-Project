@@ -9,6 +9,7 @@ const modelTypesRoutes = require('./routes/modelTypesRoutes');
 const featureSetsRoutes = require('./routes/featureSetsRoutes');
 const featureFiltersRoutes = require('./routes/featureFiltersRoutes');
 const authRoutes = require('./routes/authRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 const loggerMiddleware = require('./middleware/loggerMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
@@ -24,6 +25,7 @@ app.use('/api/jobs', jobsRoutes);
 app.use('/api/model-types', modelTypesRoutes);
 app.use('/api/feature-sets', featureSetsRoutes);
 app.use('/api/feature-filters', featureFiltersRoutes);
+app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
 
 const PORT = 3000;
