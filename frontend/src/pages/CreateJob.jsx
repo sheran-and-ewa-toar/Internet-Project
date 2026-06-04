@@ -78,7 +78,6 @@ export default function CreateJob() {
     return (
         <div className="create-job-page">
 
-            {/* 🔔 TOAST MUST BE HERE (overlay level) */}
             {toast && (
                 <Toast
                     message={toast.message}

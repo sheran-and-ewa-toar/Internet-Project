@@ -1,79 +1,77 @@
 .create-job-page {
-    max-width: 750px;
-    margin: 40px auto;
+    max-width: 900px;
+    margin: 0 auto;
     padding: 20px;
 }
 
 .create-job-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    padding: 24px;
 }
 
-/* Title */
 .create-job-card h2 {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
 }
 
-/* FORM LAYOUT */
-form {
+.create-job-card form {
     display: flex;
     flex-direction: column;
-    gap: 18px; /* 👈 fixes squishing */
+    gap: 16px;
 }
 
-/* Each field group */
-label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
-}
-
-/* Inputs */
-select,
-input {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
+.create-job-card label {
     font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
 }
 
-/* Checkbox row = horizontal */
-input[type="checkbox"] {
-    width: auto;
-    transform: scale(1.1);
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.create-job-card input,
+.create-job-card select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: 0.2s ease;
 }
 
 .checkbox-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 500;
+    padding: 8px 0;
+    color: var(--text);
 }
 
-/* Section grouping (VERY IMPORTANT UX FIX) */
-.form-section {
-    padding: 14px;
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    background: #fafafa;
-}
-
-/* Button */
-button {
+.create-job-card button {
     margin-top: 10px;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 12px 14px;
     border: none;
-    background: #1565c0;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+    transition: 0.2s ease;
 }
 
-button:hover {
-    background: #0d47a1;
+.create-job-card button:hover {
+    background: var(--button-hover);
+}
+
+.form-error {
+    color: #dc2626;
+    font-size: 13px;
 }

@@ -12,9 +12,6 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // -------------------------
-    // Fetch all static metadata
-    // -------------------------
     const fetchMeta = async () => {
         const [fsRes, mtRes] = await Promise.all([
             api.get("/api/feature-sets"),
@@ -25,18 +22,12 @@ export default function Dashboard() {
         setModelTypes(mtRes.data?.data ?? mtRes.data ?? []);
     };
 
-    // -------------------------
-    // Fetch jobs (poll target)
-    // -------------------------
     const fetchJobs = async () => {
         const jobsRes = await api.get("/api/jobs");
         const safeJobs = jobsRes.data?.data ?? jobsRes.data ?? [];
         setJobs(Array.isArray(safeJobs) ? safeJobs : []);
     };
 
-    // -------------------------
-    // Initial load
-    // -------------------------
     useEffect(() => {
         const loadAll = async () => {
             try {
@@ -59,9 +50,6 @@ export default function Dashboard() {
         loadAll();
     }, []);
 
-    // -------------------------
-    // Polling (LIVE updates)
-    // -------------------------
     useEffect(() => {
         const interval = setInterval(() => {
             fetchJobs().catch(err => {

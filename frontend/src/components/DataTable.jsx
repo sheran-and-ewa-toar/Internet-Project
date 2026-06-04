@@ -30,6 +30,8 @@ export default function DataTable({ jobs = [] }) {
                         <th>Pearson</th>
                         <th>Variance</th>
                         <th>Accuracy</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
                         <th>F1</th>
                         <th>CV Mean</th>
                         <th>CV Std</th>
@@ -75,6 +77,8 @@ export default function DataTable({ jobs = [] }) {
                             </td>
 
                             <td>{job.accuracy ?? "-"}</td>
+                            <td>{job.precision ?? "-"}</td>
+                            <td>{job.recall ?? "-"}</td>
                             <td>{job.f1Score ?? "-"}</td>
                             <td>{job.cv_mean ?? "-"}</td>
                             <td>{job.cv_std ?? "-"}</td>
