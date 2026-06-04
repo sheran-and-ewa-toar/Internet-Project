@@ -1,57 +1,56 @@
+import "../styles/Card.css";
+
 export default function Card({ job }) {
     if (!job) return null;
+
     return (
-        <div
-            style={{
-                border: "1px solid #ddd",
-                borderRadius: "12px",
-                padding: "16px",
-                marginBottom: "12px",
-                backgroundColor: "#fff"
-            }}
-        >
-            <h3 style={{ marginTop: 0 }}>
-                Job #{job.jobId}
-            </h3>
+        <div className="job-card">
 
-            <small style={{ color: "#666" }}>
-                Created: {new Date(job.createDate).toLocaleString()}
-            </small>
+            <div className="job-card-header">
+                <h3>Job #{job.jobId}</h3>
 
-            <hr />
+                <span className="job-date">
+                    {new Date(job.createDate).toLocaleDateString()}
+                </span>
+            </div>
 
-            {/* CONFIGURATION */}
-            <h4>Configuration</h4>
+            <div className="card-section">
+                <h4>Configuration</h4>
 
-            <p><b>Feature Set ID:</b> {job.featureSetId}</p>
-            <p><b>Model Type ID:</b> {job.modelTypeId}</p>
+                <p>
+                    <strong>Feature Set:</strong> {job.featureSetName}
+                </p>
 
-            <p>
-                <b>Pearson:</b>{" "}
-                {job.pearsonEnabled
-                    ? `Enabled (${job.pearsonThreshold})`
-                    : "Disabled"}
-            </p>
+                <p>
+                    <strong>Model:</strong> {job.modelName}
+                </p>
 
-            <p>
-                <b>Variance:</b>{" "}
-                {job.varianceEnabled
-                    ? `Enabled (${job.varianceThreshold})`
-                    : "Disabled"}
-            </p>
+                <p>
+                    <strong>Pearson Filter:</strong>{" "}
+                    {job.pearsonEnabled
+                        ? job.pearsonThreshold
+                        : "Disabled"}
+                </p>
 
-            <hr />
+                <p>
+                    <strong>Variance Filter:</strong>{" "}
+                    {job.varianceEnabled
+                        ? job.varianceThreshold
+                        : "Disabled"}
+                </p>
+            </div>
 
-            {/* RESULTS */}
-            <h4>Results</h4>
+            <div className="card-section">
+                <h4>Results</h4>
 
-            <p><b>Accuracy:</b> {job.accuracy ?? "-"}</p>
-            <p><b>Precision:</b> {job.precision ?? "-"}</p>
-            <p><b>Recall:</b> {job.recall ?? "-"}</p>
-            <p><b>F1 Score:</b> {job.f1Score ?? "-"}</p>
+                <p><strong>Accuracy:</strong> {job.accuracy ?? "-"}</p>
+                <p><strong>Precision:</strong> {job.precision ?? "-"}</p>
+                <p><strong>Recall:</strong> {job.recall ?? "-"}</p>
+                <p><strong>F1 Score:</strong> {job.f1Score ?? "-"}</p>
+                <p><strong>CV Mean:</strong> {job.cv_mean ?? "-"}</p>
+                <p><strong>CV Std:</strong> {job.cv_std ?? "-"}</p>
+            </div>
 
-            <p><b>CV Mean:</b> {job.cv_mean ?? "-"}</p>
-            <p><b>CV Std:</b> {job.cv_std ?? "-"}</p>
         </div>
     );
 }

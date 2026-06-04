@@ -1,27 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import "../styles/Layout.css";
 
 export default function Layout() {
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
+        <div className="layout">
             <Navbar />
 
-            <main
-                style={{
-                    flex: 1,
-                    padding: "24px",
-                    maxWidth: "1200px",
-                    width: "100%",
-                    margin: "0 auto",
-                }}
-            >
+            <main className="layout-main">
                 <Outlet />
             </main>
 
