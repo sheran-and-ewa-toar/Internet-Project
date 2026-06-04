@@ -4,9 +4,9 @@
     align-items: center;
 
     padding: 14px 20px;
-    background: white;
+    background: var(--surface);
 
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
 
     position: sticky;
     top: 0;
@@ -15,7 +15,7 @@
 
 .navbar-left {
     font-weight: 700;
-    color: #0f766e;
+    color: var(--primary);
     font-size: 18px;
 }
 
@@ -26,13 +26,13 @@
 
 .navbar-center a {
     text-decoration: none;
-    color: #374151;
+    color: var(--text);
     font-weight: 500;
-    transition: 0.2s;
+    transition: color 0.2s ease;
 }
 
 .navbar-center a:hover {
-    color: #0f766e;
+    color: var(--primary);
 }
 
 .navbar-right {
@@ -42,19 +42,19 @@
 }
 
 .navbar-right span {
-    color: #374151;
+    color: var(--muted);
 }
 
 .navbar-right button {
-    background: #0f766e;
-    color: white;
+    background: var(--primary);
+    color: var(--primary-foreground);
     border: none;
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.2s ease;
 }
 
 .navbar-right button:hover {
-    background: #115e59;
+    background: var(--button-hover);
 }

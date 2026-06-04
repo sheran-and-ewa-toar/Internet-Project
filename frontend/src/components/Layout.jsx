@@ -1,15 +1,14 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import "../styles/Layout.css";
 
-export default function Layout() {
+export default function Layout({ theme, setTheme }) {
     return (
         <div className="layout">
             <Navbar />
 
             <main className="layout-main">
-                <Outlet />
+                <Outlet context={{ theme, setTheme }} />
             </main>
 
             <Footer />

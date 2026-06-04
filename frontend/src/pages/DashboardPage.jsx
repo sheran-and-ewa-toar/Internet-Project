@@ -50,7 +50,7 @@ export default function Dashboard() {
     if (loading) return <p>Loading dashboard...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-    // ✅ enrich jobs
+    
     const enrichedJobs = (jobs || []).map(job => ({
         ...job,
 
@@ -103,6 +103,9 @@ export default function Dashboard() {
             <section className="dashboard-section">
                 <h2>Training History</h2>
                 <DataTable jobs={enrichedJobs} />
+                <div className="jobs-count">
+                    Total jobs: {enrichedJobs.length}
+                </div>
             </section>
 
         </div>

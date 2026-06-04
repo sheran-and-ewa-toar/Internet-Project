@@ -1,10 +1,12 @@
 const { success, error } = require('../utils/responseHelpers');
 const users = require('../models/users.json');
 
+const validThemes = ['light', 'dark', 'pink', 'teal'];
+
 const buildSettingsPayload = (user) => ({
-    username: user.firstName || '',
+    username: user.firstName,
     email: user.email || '',
-    theme: user.theme || 'light'
+    theme: validThemes.includes(user.theme) ? user.theme : 'light'
 });
 
 const getSettings = (req, res) => {
@@ -37,6 +39,10 @@ const updateSettings = (req, res) => {
 
     if (!emailRegex.test(email)) {
         return res.status(400).json(error('VALIDATION_ERROR', 'Please provide a valid email address.'));
+    }
+
+    if (!validThemes.includes(theme)) {
+        return res.status(400).json(error('VALIDATION_ERROR', 'Theme must be one of light, dark, pink, or teal.'));
     }
 
     user.username = username.trim();
