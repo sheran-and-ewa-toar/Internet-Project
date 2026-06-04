@@ -9,11 +9,27 @@ export default function Settings() {
     const [success, setSuccess] = useState("");
 
     useEffect(() => {
-        api
-            .get("/api/settings")
-            .then((res) => setSettings(res.data))
-            .catch(() => setError("Unable to load settings."))
-            .finally(() => setLoading(false));
+        const fetchSettings = async () => {
+            try {
+                setError("");
+                
+                const res = await api.get("/api/settings");
+                
+                const backendData = res.data?.data || res.data;
+                
+                setSettings({
+                    username: backendData.username || "",
+                    email: backendData.email || "",
+                    theme: backendData.theme || ""
+                });
+            } catch (err) {
+                setError("Unable to load initial settings profile.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSettings();
     }, []);
 
     const validateSettings = () => {
