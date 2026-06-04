@@ -2,12 +2,21 @@ import "../styles/DataTable.css";
 
 export default function DataTable({ jobs = [] }) {
     if (!jobs.length) {
-        return (
-            <div className="table-empty">
-                No training jobs found.
-            </div>
-        );
+        return <p>No training jobs found.</p>;
     }
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "completed":
+                return "#2e7d32";
+            case "running":
+                return "#1565c0";
+            case "failed":
+                return "#c62828";
+            default:
+                return "#ef6c00";
+        }
+    };
 
     return (
         <div className="table-wrapper">
@@ -15,6 +24,7 @@ export default function DataTable({ jobs = [] }) {
                 <thead>
                     <tr>
                         <th>Job</th>
+                        <th>Status</th>
                         <th>Feature Set</th>
                         <th>Model</th>
                         <th>Pearson</th>
@@ -29,7 +39,24 @@ export default function DataTable({ jobs = [] }) {
                 <tbody>
                     {jobs.map(job => (
                         <tr key={job.jobId}>
+
                             <td className="job-id">#{job.jobId}</td>
+
+                            <td>
+                                <span
+                                    style={{
+                                        color: "white",
+                                        background: getStatusColor(job.status),
+                                        padding: "3px 8px",
+                                        borderRadius: "10px",
+                                        fontSize: "12px",
+                                        fontWeight: "bold",
+                                        textTransform: "uppercase"
+                                    }}
+                                >
+                                    {job.status || "queued"}
+                                </span>
+                            </td>
 
                             <td>{job.featureSetName || job.featureSetId}</td>
 
@@ -37,7 +64,7 @@ export default function DataTable({ jobs = [] }) {
 
                             <td>
                                 {job.pearsonEnabled
-                                    ? `(${job.pearsonThreshold}`
+                                    ? `${job.pearsonThreshold}`
                                     : "—"}
                             </td>
 

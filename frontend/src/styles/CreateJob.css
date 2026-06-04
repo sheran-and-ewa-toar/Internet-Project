@@ -1,0 +1,79 @@
+.create-job-page {
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.create-job-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* Title */
+.create-job-card h2 {
+    margin-bottom: 24px;
+}
+
+/* FORM LAYOUT */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px; /* 👈 fixes squishing */
+}
+
+/* Each field group */
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Inputs */
+select,
+input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* Checkbox row = horizontal */
+input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.1);
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+/* Section grouping (VERY IMPORTANT UX FIX) */
+.form-section {
+    padding: 14px;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+/* Button */
+button {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #1565c0;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #0d47a1;
+}

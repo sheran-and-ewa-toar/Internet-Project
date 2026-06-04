@@ -1,5 +1,30 @@
 const { success, error } = require('../utils/responseHelpers');
 const jobs = require('../models/jobs.json');
+const axios = require("axios");
+
+const FEATURE_SET_MAP = {
+    1: "1d",
+    2: "2d",
+    3: "3d",
+    4: "1d_2d",
+    5: "1d_3d",
+    6: "2d_3d",
+    7: "all"
+};
+
+const MODEL_MAP = {
+    1: "RF",
+    2: "XGB"
+};
+
+const fs = require("fs");
+const path = require("path");
+
+const JOBS_PATH = path.join(__dirname, "../models/jobs.json");
+
+function saveJobs() {
+    fs.writeFileSync(JOBS_PATH, JSON.stringify(jobs, null, 2));
+}
 
 const getAllJobs = (req, res) => {
     const role = req.userRole;
@@ -56,60 +81,95 @@ const getJobById = (req, res) => {
     );
 };
 
-const createJob = (req, res) => {
+const createJob = async (req, res) => {
+    try {
+        const userId = req.userId;
 
-    const userId = req.userId;
+        const {
+            featureSetId,
+            modelTypeId,
+            pearsonEnabled,
+            pearsonThreshold,
+            varianceEnabled,
+            varianceThreshold
+        } = req.body;
 
-    const {
-        featureSetId,
-        modelTypeId,
-
-        pearsonEnabled = false,
-        pearsonThreshold = null,
-
-        varianceEnabled = false,
-        varianceThreshold = null
-    } = req.body;
-
-    const newId =
-        jobs.length > 0
+        const newId = jobs.length > 0
             ? Math.max(...jobs.map(j => j.jobId)) + 1
             : 1;
 
-    const newJob = {
-        jobId: newId,
+        const job = {
+            jobId: newId,
+            userId,
+            featureSetId,
+            modelTypeId,
 
-        userId,
+            featureSetName: FEATURE_SET_MAP[featureSetId],
+            modelName: MODEL_MAP[modelTypeId],
 
-        featureSetId,
-        modelTypeId,
+            pearsonEnabled: !!pearsonEnabled,
+            pearsonThreshold: pearsonThreshold ?? null,
 
-        pearsonEnabled,
-        pearsonThreshold,
+            varianceEnabled: !!varianceEnabled,
+            varianceThreshold: varianceThreshold ?? null,
 
-        varianceEnabled,
-        varianceThreshold,
+            status: "queued",
+            createDate: new Date().toISOString()
+        };
 
-        status: 'pending',
+        jobs.push(job);
 
-        accuracy: null,
-        precision: null,
-        recall: null,
-        f1Score: null,
-        cv_mean: null,
-        cv_std: null,
+        job.status = "running";
 
-        createDate: new Date().toISOString()
-    };
-
-    jobs.push(newJob);
-
-    return res.status(201).json(
-        success({
-            message: 'Job created',
-            jobId: newId
+        axios.post("http://localhost:8000/train", {
+            jobId: job.jobId,
+            feature_set: job.featureSetName,
+            model: job.modelName,
+            variance_enabled: job.varianceEnabled,
+            variance_threshold: job.varianceThreshold,
+            pearson_enabled: job.pearsonEnabled,
+            pearson_threshold: job.pearsonThreshold
         })
-    );
+        .then((response) => {
+            const metrics = response.data.metrics || {};
+
+            job.status = "completed";
+
+            job.accuracy = Number(metrics.accuracy).toFixed(2) ?? null;
+            job.precision = Number(metrics.precision).toFixed(2) ?? null;
+            job.recall = Number(metrics.recall).toFixed(2) ?? null;
+            job.f1Score = Number(metrics.f1Score).toFixed(2) ?? null;
+            job.cv_mean = Number(metrics.cv_mean).toFixed(2) ?? null;
+            job.cv_std = Number(metrics.cv_std).toFixed(2) ?? null;
+
+            job.featureCount = response.data.featureCount ?? null;
+            saveJobs();
+        })
+        .catch((err) => {
+            job.status = "failed";
+            saveJobs();
+            job.error =
+                err.response?.data?.detail?.message ||
+                err.message ||
+                "ML service failed";
+
+            job.errorTrace =
+                err.response?.data?.detail?.trace || null;
+        });
+
+        return res.status(201).json(
+            success({
+                message: "Job created",
+                jobId: job.jobId,
+                status: job.status
+            })
+        );
+
+    } catch (err) {
+        return res.status(500).json(
+            error("INTERNAL_ERROR", "Failed to create job")
+        );
+    }
 };
 
 const updateJobById = (req, res) => {
