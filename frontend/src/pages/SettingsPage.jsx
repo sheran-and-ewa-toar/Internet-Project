@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import "../styles/Settings.css";
 
 export default function Settings() {
-
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -35,21 +35,10 @@ export default function Settings() {
     const validateSettings = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!settings.username?.trim()) {
-            return "Username is required.";
-        }
-
-        if (!settings.email?.trim()) {
-            return "Email is required.";
-        }
-
-        if (!emailRegex.test(settings.email)) {
-            return "Please enter a valid email address.";
-        }
-
-        if (!settings.theme?.trim()) {
-            return "Theme selection cannot be empty.";
-        }
+        if (!settings.username?.trim()) return "Username is required.";
+        if (!settings.email?.trim()) return "Email is required.";
+        if (!emailRegex.test(settings.email)) return "Invalid email.";
+        if (!settings.theme?.trim()) return "Theme is required.";
 
         return null;
     };
@@ -75,84 +64,70 @@ export default function Settings() {
         } catch (err) {
             setError(
                 err.response?.data?.error?.message ||
-                    "Unable to save settings. Please try again."
+                "Unable to save settings."
             );
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <div className="settings-loading">Loading...</div>;
 
     return (
-        <div>
-            <h2>Settings</h2>
+        <div className="settings-page">
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="settings-username">Username</label>
-                    <input
-                        id="settings-username"
-                        type="text"
-                        value={settings.username || ""}
-                        onChange={(e) =>
-                            setSettings({
-                                ...settings,
-                                username: e.target.value,
-                            })
-                        }
-                        placeholder="Enter username"
-                    />
-                </div>
+            <div className="settings-card">
 
-                <div>
-                    <label htmlFor="settings-email">Email</label>
-                    <input
-                        id="settings-email"
-                        type="email"
-                        value={settings.email || ""}
-                        onChange={(e) =>
-                            setSettings({
-                                ...settings,
-                                email: e.target.value,
-                            })
-                        }
-                        placeholder="Enter email"
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="settings-theme">Theme</label>
-                    <input
-                        id="settings-theme"
-                        type="text"
-                        value={settings.theme || ""}
-                        onChange={(e) =>
-                            setSettings({
-                                ...settings,
-                                theme: e.target.value,
-                            })
-                        }
-                        placeholder="Preferred theme"
-                    />
-                </div>
-
-                <button type="submit" disabled={loading}>
-                    {loading ? "Saving..." : "Save Settings"}
-                </button>
-            </form>
-
-            {error && (
-                <p style={{ color: "#b00020", marginTop: "14px" }}>
-                    {error}
+                <h2>⚙️ Settings</h2>
+                <p className="settings-subtitle">
+                    Manage your profile and experiment preferences
                 </p>
-            )}
 
-            {success && (
-                <p style={{ color: "#2a7f3d", marginTop: "14px" }}>
-                    {success}
-                </p>
-            )}
+                <form onSubmit={handleSubmit} className="settings-form">
+
+                    <div className="form-group">
+                        <label>Username</label>
+                        <input
+                            type="text"
+                            value={settings.username || ""}
+                            onChange={(e) =>
+                                setSettings({ ...settings, username: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            value={settings.email || ""}
+                            onChange={(e) =>
+                                setSettings({ ...settings, email: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Theme</label>
+                        <input
+                            type="text"
+                            value={settings.theme || ""}
+                            onChange={(e) =>
+                                setSettings({ ...settings, theme: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    <button disabled={loading}>
+                        {loading ? "Saving..." : "Save Settings"}
+                    </button>
+
+                    {error && <div className="error-box">{error}</div>}
+                    {success && <div className="success-box">{success}</div>}
+                </form>
+
+            </div>
+
         </div>
     );
 }

@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import "../styles/Navbar.css";
 
 export default function Navbar() {
-
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-
         const fetchUser = async () => {
             try {
                 const res = await api.get("/api/users/me");
@@ -20,7 +19,6 @@ export default function Navbar() {
         };
 
         fetchUser();
-
     }, []);
 
     const logout = async () => {
@@ -33,49 +31,27 @@ export default function Navbar() {
             setUser(null);
 
             navigate("/login");
-
         } catch (err) {
             console.error("Logout failed", err);
         }
     };
 
     return (
-        <nav
-            style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "10px 20px",
-                borderBottom: "1px solid #ddd"
-            }}
-        >
-
-            {/* LEFT: Logo / Project Name */}
-            <div style={{ fontWeight: "bold" }}>
-                ML Training Platform
+        <nav className="navbar">
+            <div className="navbar-left">
+                🧬 miRNA Platform
             </div>
 
-            {/* CENTER: Navigation */}
-            <div style={{ display: "flex", gap: "15px" }}>
+            <div className="navbar-center">
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/settings">Settings</Link>
             </div>
 
-            {/* RIGHT: User + Logout */}
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div className="navbar-right">
+                {user && <span>👤 {user.firstName}</span>}
 
-                {user && (
-                    <span>
-                        👤 {user.firstName}
-                    </span>
-                )}
-
-                <button onClick={logout}>
-                    Logout
-                </button>
-
+                <button onClick={logout}>Logout</button>
             </div>
-
         </nav>
     );
 }

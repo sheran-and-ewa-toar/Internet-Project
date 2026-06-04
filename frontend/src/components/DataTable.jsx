@@ -1,32 +1,60 @@
-export default function DataTable({ jobs }) {
+import "../styles/DataTable.css";
 
+export default function DataTable({ jobs = [] }) {
     if (!jobs.length) {
-        return <p>No training jobs found.</p>;
+        return (
+            <div className="table-empty">
+                No training jobs found.
+            </div>
+        );
     }
 
     return (
-        <table border="1" cellPadding="8">
-            <thead>
-                <tr>
-                    <th>Job ID</th>
-                    <th>Feature Set</th>
-                    <th>Model Type</th>
-                    <th>Filter</th>
-                    <th>Accuracy</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {jobs.map(job => (
-                    <tr key={job.jobId}>
-                        <td>{job.jobId}</td>
-                        <td>{job.featureSetId}</td>
-                        <td>{job.modelTypeId}</td>
-                        <td>{job.filterId}</td>
-                        <td>{job.accuracy}</td>
+        <div className="table-wrapper">
+            <table className="data-table">
+                <thead>
+                    <tr>
+                        <th>Job</th>
+                        <th>Feature Set</th>
+                        <th>Model</th>
+                        <th>Pearson</th>
+                        <th>Variance</th>
+                        <th>Accuracy</th>
+                        <th>F1</th>
+                        <th>CV Mean</th>
+                        <th>CV Std</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    {jobs.map(job => (
+                        <tr key={job.jobId}>
+                            <td className="job-id">#{job.jobId}</td>
+
+                            <td>{job.featureSetName || job.featureSetId}</td>
+
+                            <td>{job.modelName || job.modelTypeId}</td>
+
+                            <td>
+                                {job.pearsonEnabled
+                                    ? `(${job.pearsonThreshold}`
+                                    : "—"}
+                            </td>
+
+                            <td>
+                                {job.varianceEnabled
+                                    ? `${job.varianceThreshold}`
+                                    : "—"}
+                            </td>
+
+                            <td>{job.accuracy ?? "-"}</td>
+                            <td>{job.f1Score ?? "-"}</td>
+                            <td>{job.cv_mean ?? "-"}</td>
+                            <td>{job.cv_std ?? "-"}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
 }
