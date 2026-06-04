@@ -10,11 +10,5 @@
     "name": "Variance Threshold",
     "shortName": "variance",
     "description": "Removes low-variance features"
-  },
-  {
-    "filterId": 3,
-    "name": "Principal Component Analysis",
-    "shortName": "pca",
-    "description": "Dimensionality reduction technique"
   }
 ]

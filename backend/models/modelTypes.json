@@ -10,11 +10,5 @@
     "name": "XGBoost",
     "shortName": "XGB",
     "description": "Gradient boosting classification model"
-  },
-  {
-    "modelTypeId": 3,
-    "name": "Support Vector Machine",
-    "shortName": "SVM",
-    "description": "Hyperplane-based classification model"
   }
 ]

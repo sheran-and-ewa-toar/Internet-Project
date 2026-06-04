@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import Card from "../components/Card";
-
-console.log("DASHBOARD RENDERED");
+import DataTable from "../components/DataTable";
 
 export default function Dashboard() {
     const [jobs, setJobs] = useState([]);
@@ -16,7 +15,12 @@ export default function Dashboard() {
 
                 const res = await api.get("/api/jobs");
 
-                setJobs(res.data.data || []);
+                const safeJobs = Array.isArray(res.data?.data)
+                    ? res.data.data
+                    : [];
+
+                setJobs(safeJobs);
+
             } catch (err) {
                 setError("Failed to load jobs");
             } finally {
@@ -30,8 +34,8 @@ export default function Dashboard() {
     if (loading) return <p>Loading dashboard...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-    // last 3 jobs (most recent first)
     const recentJobs = [...jobs]
+        .filter(Boolean)
         .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
         .slice(0, 3);
 
@@ -42,19 +46,23 @@ export default function Dashboard() {
             {recentJobs.length === 0 ? (
                 <p>No training runs found</p>
             ) : (
-                recentJobs.map(job => (
-                    <Card
-                        key={job.jobId}
-                        title={`Job #${job.jobId} (Model ${job.modelTypeId})`}
-                        featureSetId={job.featureSetId}
-                        accuracy={job.accuracy}
-                        precision={job.precision}
-                        recall={job.recall}
-                        f1Score={job.f1Score}
-                        date={job.createDate}
-                    />
-                ))
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "12px",
+                        flexWrap: "wrap",
+                    }}
+                >
+                    {recentJobs.map((job) => (
+                        <div style={{ flex: "1 1 300px" }} key={job.jobId}>
+                            <Card job={job} />
+                        </div>
+                    ))}
+                </div>
             )}
+
+            <h2 style={{ marginTop: "30px" }}>All Training Runs</h2>
+            <DataTable jobs={jobs} />
         </div>
     );
 }
