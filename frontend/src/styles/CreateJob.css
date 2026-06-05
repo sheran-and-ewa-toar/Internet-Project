@@ -1,0 +1,77 @@
+.create-job-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.create-job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    padding: 24px;
+}
+
+.create-job-card h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.create-job-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.create-job-card label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.create-job-card input,
+.create-job-card select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: 0.2s ease;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: var(--text);
+}
+
+.create-job-card button {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.create-job-card button:hover {
+    background: var(--button-hover);
+}
+
+.form-error {
+    color: #dc2626;
+    font-size: 13px;
+}

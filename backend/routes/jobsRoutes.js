@@ -5,7 +5,6 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
 const {
-    validateBody,
     validateParams
 } = require('../middleware/validationMiddleware');
 
@@ -43,9 +42,10 @@ router.get(
 router.post(
     '/',
     authMiddleware.isAuthenticated,
-    validateBody([
-        'featureSetId',
-        'modelTypeId'
+    authMiddleware.authorizeRoles([
+        'user',
+        'manager',
+        'admin'
     ]),
     createJob
 );

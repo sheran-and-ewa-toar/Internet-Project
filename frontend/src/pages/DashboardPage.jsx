@@ -12,29 +12,32 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const fetchMeta = async () => {
+        const [fsRes, mtRes] = await Promise.all([
+            api.get("/api/feature-sets"),
+            api.get("/api/model-types")
+        ]);
+
+        setFeatureSets(fsRes.data?.data ?? fsRes.data ?? []);
+        setModelTypes(mtRes.data?.data ?? mtRes.data ?? []);
+    };
+
+    const fetchJobs = async () => {
+        const jobsRes = await api.get("/api/jobs");
+        const safeJobs = jobsRes.data?.data ?? jobsRes.data ?? [];
+        setJobs(Array.isArray(safeJobs) ? safeJobs : []);
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
+        const loadAll = async () => {
             try {
                 setLoading(true);
+                setError("");
 
-                const [jobsRes, fsRes, mtRes] = await Promise.all([
-                    api.get("/api/jobs"),
-                    api.get("/api/feature-sets"),
-                    api.get("/api/model-types")
+                await Promise.all([
+                    fetchMeta(),
+                    fetchJobs()
                 ]);
-
-                const safeJobs =
-                    jobsRes.data?.data ?? jobsRes.data ?? [];
-
-                const safeFeatureSets =
-                    fsRes.data?.data ?? fsRes.data ?? [];
-
-                const safeModelTypes =
-                    mtRes.data?.data ?? mtRes.data ?? [];
-
-                setJobs(Array.isArray(safeJobs) ? safeJobs : []);
-                setFeatureSets(Array.isArray(safeFeatureSets) ? safeFeatureSets : []);
-                setModelTypes(Array.isArray(safeModelTypes) ? safeModelTypes : []);
 
             } catch (err) {
                 console.error(err);
@@ -44,7 +47,17 @@ export default function Dashboard() {
             }
         };
 
-        fetchData();
+        loadAll();
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchJobs().catch(err => {
+                console.error("Polling failed:", err);
+            });
+        }, 5000); // every 5 seconds
+
+        return () => clearInterval(interval);
     }, []);
 
     if (loading) return <p>Loading dashboard...</p>;
@@ -66,7 +79,6 @@ export default function Dashboard() {
     }));
 
     const recentJobs = [...enrichedJobs]
-        .filter(Boolean)
         .sort((a, b) =>
             new Date(b.createDate || 0) - new Date(a.createDate || 0)
         )

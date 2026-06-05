@@ -45,6 +45,7 @@ export default function Navbar() {
             <div className="navbar-center">
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/settings">Settings</Link>
+                <Link to="/create-job">New Job</Link>
             </div>
 
             <div className="navbar-right">
