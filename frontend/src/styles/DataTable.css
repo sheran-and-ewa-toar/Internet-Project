@@ -1,52 +1,24 @@
-.table-wrapper {
-    margin-top: 20px;
-    overflow-x: auto;
-    border-radius: 14px;
-    box-shadow: var(--card-shadow);
-    background: var(--surface);
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    min-width: 900px;
-    color: var(--text);
-}
-
-.data-table thead {
-    background: var(--primary);
-    color: var(--primary-foreground);
-}
-
-.data-table th {
-    text-align: left;
-    padding: 14px 12px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-.data-table td {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-}
-
-.data-table tbody tr:hover {
-    background-color: var(--surface-alt);
-    transition: 0.2s;
-}
-
-.job-id {
-    font-weight: bold;
-    color: var(--primary);
-}
-
-.table-empty {
-    padding: 20px;
-    background: var(--surface-alt);
-    border: 1px dashed var(--border);
+.status-badge {
+    color: white;
+    padding: 3px 8px;
     border-radius: 10px;
-    color: var(--muted);
-    margin-top: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-completed {
+    background: #2e7d32;
+}
+
+.status-running {
+    background: #1565c0;
+}
+
+.status-failed {
+    background: #c62828;
+}
+
+.status-queued {
+    background: #ef6c00;
 }

@@ -2,19 +2,23 @@ import "../styles/DataTable.css";
 
 export default function DataTable({ jobs = [] }) {
     if (!jobs.length) {
-        return <p>No training jobs found.</p>;
+        return (
+            <div className="table-empty">
+                No training jobs found.
+            </div>
+        );
     }
 
-    const getStatusColor = (status) => {
+    const getStatusClass = (status) => {
         switch (status) {
             case "completed":
-                return "#2e7d32";
+                return "status-completed";
             case "running":
-                return "#1565c0";
+                return "status-running";
             case "failed":
-                return "#c62828";
+                return "status-failed";
             default:
-                return "#ef6c00";
+                return "status-queued";
         }
     };
 
@@ -39,41 +43,25 @@ export default function DataTable({ jobs = [] }) {
                 </thead>
 
                 <tbody>
-                    {jobs.map(job => (
+                    {jobs.map((job) => (
                         <tr key={job.jobId}>
-
                             <td className="job-id">#{job.jobId}</td>
 
                             <td>
-                                <span
-                                    style={{
-                                        color: "white",
-                                        background: getStatusColor(job.status),
-                                        padding: "3px 8px",
-                                        borderRadius: "10px",
-                                        fontSize: "12px",
-                                        fontWeight: "bold",
-                                        textTransform: "uppercase"
-                                    }}
-                                >
+                                <span className={`status-badge ${getStatusClass(job.status)}`}>
                                     {job.status || "queued"}
                                 </span>
                             </td>
 
                             <td>{job.featureSetName || job.featureSetId}</td>
-
                             <td>{job.modelName || job.modelTypeId}</td>
 
                             <td>
-                                {job.pearsonEnabled
-                                    ? `${job.pearsonThreshold}`
-                                    : "—"}
+                                {job.pearsonEnabled ? job.pearsonThreshold : "—"}
                             </td>
 
                             <td>
-                                {job.varianceEnabled
-                                    ? `${job.varianceThreshold}`
-                                    : "—"}
+                                {job.varianceEnabled ? job.varianceThreshold : "—"}
                             </td>
 
                             <td>{job.accuracy ?? "-"}</td>

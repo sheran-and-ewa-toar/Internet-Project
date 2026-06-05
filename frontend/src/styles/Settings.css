@@ -107,11 +107,9 @@
     color: var(--muted);
 }
 
-
-/* Settings Skeleton Layout */
 .skeleton-settings-container {
     padding: 20px;
-    max-width: 600px; /* Aligns with form card dimensions */
+    max-width: 600px;
     margin: 40px auto;
     display: flex;
     flex-direction: column;
@@ -130,7 +128,6 @@
     100% { background-position: -200% 0; }
 }
 
-/* Field Box Line Placeholders */
 .skeleton-field-label {
     height: 16px;
     width: 80px;
