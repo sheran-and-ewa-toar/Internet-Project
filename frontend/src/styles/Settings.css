@@ -106,3 +106,46 @@
     text-align: center;
     color: var(--muted);
 }
+
+
+/* Settings Skeleton Layout */
+.skeleton-settings-container {
+    padding: 20px;
+    max-width: 600px; /* Aligns with form card dimensions */
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.skeleton-pulse {
+    background: linear-gradient(90deg, var(--bg-secondary, #f0f0f0) 25%, var(--bg-hover, #e0e0e0) 50%, var(--bg-secondary, #f0f0f0) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    border-radius: 6px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Field Box Line Placeholders */
+.skeleton-field-label {
+    height: 16px;
+    width: 80px;
+    margin-bottom: 8px;
+}
+
+.skeleton-field-input {
+    height: 40px;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.skeleton-settings-btn {
+    height: 42px;
+    width: 140px;
+    margin-top: 10px;
+    border-radius: 6px;
+}

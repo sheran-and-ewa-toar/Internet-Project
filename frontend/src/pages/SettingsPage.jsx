@@ -98,7 +98,43 @@ export default function Settings() {
         }
     };
 
-    if (loading) return <div className="settings-loading">Loading...</div>;
+    if (loading) {
+        return (
+            <div className="settings-page">
+                <div className="skeleton-settings-container">
+                    {/* Title Segment */}
+                    <div>
+                        <div className="skeleton-pulse" style={{ height: '28px', width: '180px', marginBottom: '8px' }}></div>
+                        <div className="skeleton-pulse" style={{ height: '14px', width: '280px' }}></div>
+                    </div>
+
+                    {/* Form Elements Placeholders */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
+                        {/* Username Block */}
+                        <div>
+                            <div className="skeleton-pulse skeleton-field-label"></div>
+                            <div className="skeleton-pulse skeleton-field-input"></div>
+                        </div>
+
+                        {/* Email Block */}
+                        <div>
+                            <div className="skeleton-pulse skeleton-field-label"></div>
+                            <div className="skeleton-pulse skeleton-field-input"></div>
+                        </div>
+
+                        {/* Theme Selector Block */}
+                        <div>
+                            <div className="skeleton-pulse skeleton-field-label"></div>
+                            <div className="skeleton-pulse skeleton-field-input"></div>
+                        </div>
+
+                        {/* Action Button Placeholder */}
+                        <div className="skeleton-pulse skeleton-settings-btn"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="settings-page">

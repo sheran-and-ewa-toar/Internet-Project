@@ -9,10 +9,6 @@ import Layout from "./components/Layout";
 
 const themeOptions = ["light", "dark", "pink", "teal"];
 
-// function isLoggedIn() {
-//     return !!localStorage.getItem("userId");
-// }
-
 export default function App() {
     const [theme, setTheme] = useState(() => {
         const saved = localStorage.getItem("appTheme");

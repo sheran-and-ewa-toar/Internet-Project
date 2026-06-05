@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# 🧬 miRNA Predictor Platform - Frontend Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome to the frontend user interface for the **miRNA Predictor Platform**, a Machine Learning Platform designed for structural microRNA analysis, training run tracking, and experimental feature evaluations.
 
-## Available Scripts
+This application is built using **React.js** and interfaces directly with the backend REST API to provide responsive dashboards, settings state synchronizations, and data-driven analysis views.
 
-In the project directory, you can run:
 
-### `npm start`
+* **Framework:** React.js (via `create-react-app`)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* **Routing System:** React Router v6 (Client-side routing guards)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* **Data Layer:** Axios HTTP Client
 
-### `npm test`
+* **Target Interface Port:** `http://localhost:5173` (Default Browser Window)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* **API Target Base URL:** `http://localhost:3000` (Backend API Engine)
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🚀 Getting Started & Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Follow these steps sequentially to configure, execute, and evaluate the application workspace environment locally.
 
-### `npm run eject`
+### 1. Install Project Dependencies
+Before executing the application script runtime engine for the first time, compile the required operational node libraries using the package manager deployment command:
+```bash
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Launch the local development workspace engine. This compiles your code and automatically fires open your web browser:
+```bash
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Screens 
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 1. Login Screen (/login)
+Your entry point to the application.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+What to do: Enter your research email address and password (minimum 6 characters) to authenticate your access.
 
-## Learn More
+What happens: The system validates your format instantly, secures a quick handshake with the backend database, and forwards you to your workspace.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 2. Main Analytics Dashboard (/dashboard)
+The primary working hub of the platform where sequence analysis occurs.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Relational Job Stream: Displays automated cards detailing recent structural machine learning experiments.
 
-### Code Splitting
+History Table Grid: Maps your complete pipeline run dataset out line-by-line so you can easily compare classification performance metrics.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Real-time Live Polling: Automatically loops a background query every 5 seconds to catch new processing updates without freezing your view.
 
-### Analyzing the Bundle Size
+### 3. Settings Control Panel (/settings)
+Your personal profile customization suite.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Profile Syncing: Keeps your username and contact records up to date with the server.
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Dynamic Theme Spectrum Switcher: Lets you instantly switch the color palette across 4 distinct styles to suit your working environment: Light, Dark, Pink, or Teal.
