@@ -9,15 +9,17 @@ import Layout from "./components/Layout";
 
 const themeOptions = ["light", "dark", "pink", "teal"];
 
-function isLoggedIn() {
-    return !!localStorage.getItem("userId");
-}
+// function isLoggedIn() {
+//     return !!localStorage.getItem("userId");
+// }
 
 export default function App() {
     const [theme, setTheme] = useState(() => {
         const saved = localStorage.getItem("appTheme");
         return themeOptions.includes(saved) ? saved : "light";
     });
+
+    const [authenticated, setAuthenticated] = useState(() => !!localStorage.getItem("userId"));
 
     useEffect(() => {
         document.documentElement.dataset.theme = theme;
@@ -30,13 +32,13 @@ export default function App() {
             <Routes>
 
                 {/* public route */}
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<Login setAuthenticated={setAuthenticated} />} />
 
                 {/* protected routes */}
                 <Route
                     path="/"
                     element={
-                        isLoggedIn() ? (
+                        authenticated ? (
                             <Layout theme={theme} setTheme={setTheme} />
                         ) : (
                             <Navigate to="/login" />
@@ -46,7 +48,7 @@ export default function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="/create-job" element={<CreateJob />} />
+                    <Route path="create-job" element={<CreateJob />} />
                 </Route>
 
             </Routes>

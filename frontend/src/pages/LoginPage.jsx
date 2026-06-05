@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "../styles/Login.css";
 
-export default function Login() {
+export default function Login({ setAuthenticated }) {
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -23,7 +23,9 @@ export default function Login() {
         return null;
     };
 
-    const handleLogin = async () => {
+    const handleLogin = async (e) => {
+        
+        e.preventDefault(); // prevent form submission
         const validationError = validateForm();
 
         if (validationError) {
@@ -47,6 +49,11 @@ export default function Login() {
                 `${res.data.data.firstName} ${res.data.data.lastName}`
             );
 
+            if (setAuthenticated) {
+                setAuthenticated(true);
+            }
+
+            // Redirect to dashboard upon success
             navigate("/dashboard");
         } catch (err) {
             setError(
@@ -65,7 +72,7 @@ export default function Login() {
                     <p>Machine Learning Platform for miRNA Analysis</p>
                 </div>
 
-                <div className="login-form">
+                <form className="login-form" onSubmit={handleLogin}>
                     <input
                         type="email"
                         placeholder="Email"
@@ -81,14 +88,14 @@ export default function Login() {
                     />
 
                     <button
-                        onClick={handleLogin}
+                        type="submit"
                         disabled={loading}
                     >
                         {loading ? "Logging in..." : "Login"}
                     </button>
 
                     {error && <div className="login-error">{error}</div>}
-                </div>
+                </form>
 
                 <div className="login-footer">
                     Predicting microRNA using structural and machine learning features

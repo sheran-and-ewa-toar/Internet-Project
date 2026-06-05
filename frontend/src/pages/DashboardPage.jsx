@@ -12,6 +12,28 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    useEffect(() => {
+        const syncUserPreferences = async () => {
+            try {
+                const res = await api.get("/api/settings");
+                const backendData = res.data?.data || res.data;
+                
+                if (backendData?.theme) {
+                    
+                    document.documentElement.dataset.theme = backendData.theme;
+                    document.documentElement.style.colorScheme = 
+                        backendData.theme === "dark" ? "dark" : "light";
+                    localStorage.setItem("appTheme", backendData.theme);
+                }
+            } catch (err) {
+                console.error("Could not sync user styling parameters on dashboard load", err);
+            }
+        };
+
+        syncUserPreferences();
+    }, []);
+
+
     const fetchMeta = async () => {
         const [fsRes, mtRes] = await Promise.all([
             api.get("/api/feature-sets"),
@@ -60,7 +82,31 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    if (loading) return <p>Loading dashboard...</p>;
+    if (loading) return (
+        <div className="skeleton-container">
+            { }
+            <div className="dashboard-header">
+                <div className="skeleton-pulse skeleton-title"></div>
+                <div className="skeleton-pulse skeleton-subtitle"></div>
+            </div>
+
+            { }
+            <section className="dashboard-section">
+                <div className="skeleton-pulse skeleton-section-heading" style={{ marginBottom: '15px' }}></div>
+                <div className="skeleton-grid">
+                    <div className="skeleton-pulse skeleton-card"></div>
+                    <div className="skeleton-pulse skeleton-card"></div>
+                    <div className="skeleton-pulse skeleton-card"></div>
+                </div>
+            </section>
+
+            { }
+            <section className="dashboard-section">
+                <div className="skeleton-pulse skeleton-section-heading" style={{ marginBottom: '15px' }}></div>
+                <div className="skeleton-pulse skeleton-table"></div>
+            </section>
+        </div>
+    );
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
     

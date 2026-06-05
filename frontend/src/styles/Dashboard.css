@@ -57,3 +57,39 @@
 
     box-shadow: var(--card-shadow);
 }
+
+
+.skeleton-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+
+.skeleton-pulse {
+    background: linear-gradient(90deg, var(--bg-secondary, #f0f0f0) 25%, var(--bg-hover, #e0e0e0) 50%, var(--bg-secondary, #f0f0f0) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+.skeleton-title { height: 32px; width: 40%; margin-bottom: 10px; }
+.skeleton-subtitle { height: 18px; width: 60%; margin-bottom: 20px; }
+.skeleton-section-heading { height: 24px; width: 20%; }
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+.skeleton-card { height: 160px; }
+.skeleton-table { height: 250px; width: 100%; }

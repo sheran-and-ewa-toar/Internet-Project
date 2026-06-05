@@ -361,5 +361,19 @@
     "cv_mean": "0.58",
     "cv_std": "0.02",
     "featureCount": 51
+  },
+  {
+    "jobId": 20,
+    "userId": 3,
+    "featureSetId": "5",
+    "modelTypeId": "1",
+    "featureSetName": "1d_3d",
+    "modelName": "RF",
+    "pearsonEnabled": true,
+    "pearsonThreshold": 0.9,
+    "varianceEnabled": false,
+    "varianceThreshold": 0.01,
+    "status": "failed",
+    "createDate": "2026-06-05T15:45:53.078Z"
   }
 ]

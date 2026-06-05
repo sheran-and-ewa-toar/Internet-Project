@@ -11,8 +11,11 @@ export const login = async (email, password) => {
 };
 
 export const logout = async () => {
-
-    await api.post('/api/auth/logout');
-
-    localStorage.clear();
+    try {
+        await api.post('/api/auth/logout');
+    } catch (err) {
+        console.error("Logout cleanup failed on backend:", err);
+    } finally {
+        localStorage.clear();
+    }
 };
