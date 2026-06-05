@@ -11,7 +11,7 @@ const themeOptions = [
 ];
 
 export default function Settings() {
-    const { theme: savedTheme, setTheme: setAppTheme } = useOutletContext();
+    const { theme: savedTheme, setTheme: setAppTheme, setUser } = useOutletContext();
 
     const [settings, setSettings] = useState({});
     const [originalSettings, setOriginalSettings] = useState({});
@@ -84,8 +84,35 @@ export default function Settings() {
         try {
             setLoading(true);
 
-            await api.put("/api/settings", settings);
-            setOriginalSettings(settings);
+            // Send the put update to the backend
+            const res = await api.put("/api/settings", settings);
+            
+            const responseData = res.data?.data || res.data;
+            const updatedBackendSettings = responseData?.settings || responseData;
+
+            if (updatedBackendSettings) {
+                const synchronizedData = {
+                    username: updatedBackendSettings.username || "",
+                    email: updatedBackendSettings.email || "",
+                    theme: updatedBackendSettings.theme || "light"
+                };
+
+                setSettings(synchronizedData);
+                setOriginalSettings(synchronizedData);
+                setUser?.((prev) => ({
+                    ...prev,
+                    username: synchronizedData.username,
+                    email: synchronizedData.email
+                }));
+            } else {
+                setOriginalSettings(settings);
+                setUser?.((prev) => ({
+                    ...prev,
+                    username: settings.username,
+                    email: settings.email
+                }));
+            }
+
             setSuccess("Settings updated successfully.");
             setAppTheme?.(settings.theme);
         } catch (err) {
@@ -134,7 +161,7 @@ export default function Settings() {
                 </div>
             </div>
         );
-    }
+}
 
     return (
         <div className="settings-page">

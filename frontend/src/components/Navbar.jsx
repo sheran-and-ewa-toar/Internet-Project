@@ -3,23 +3,28 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import "../styles/Navbar.css";
 
-export default function Navbar() {
-    const [user, setUser] = useState(null);
+export default function Navbar({ user: propUser, setUser: propSetUser }) {
+    const [localUser, setLocalUser] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (propUser) return;
+
         const fetchUser = async () => {
             try {
                 const res = await api.get("/api/users/me");
-                setUser(res.data.data);
+                setLocalUser(res.data.data);
             } catch (err) {
                 console.error("Failed to load user", err);
-                setUser(null);
+                setLocalUser(null);
             }
         };
 
         fetchUser();
-    }, []);
+    }, [propUser]);
+
+    const user = propUser || localUser;
+    const setUser = propSetUser || setLocalUser;
 
     const logout = async () => {
         try {
@@ -49,7 +54,11 @@ export default function Navbar() {
             </div>
 
             <div className="navbar-right">
-                {user && <span>👤 {user.firstName}</span>}
+                {user && (
+                    <span>
+                        👤 {user.username?.trim() || [user.firstName, user.lastName].filter(Boolean).join(" ")}
+                    </span>
+                )}
 
                 <button onClick={logout}>Logout</button>
             </div>

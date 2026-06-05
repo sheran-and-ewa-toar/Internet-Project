@@ -4,7 +4,7 @@ const users = require('../models/users.json');
 const validThemes = ['light', 'dark', 'pink', 'teal'];
 
 const buildSettingsPayload = (user) => ({
-    username: user.firstName,
+    username: user.username?.trim() || user.firstName || '',
     email: user.email || '',
     theme: validThemes.includes(user.theme) ? user.theme : 'light'
 });
@@ -45,7 +45,7 @@ const updateSettings = (req, res) => {
         return res.status(400).json(error('VALIDATION_ERROR', 'Theme must be one of light, dark, pink, or teal.'));
     }
 
-    user.username = username.trim();
+    user.firstName = username.trim();
     user.email = email.trim();
     user.theme = theme.trim();
     user.updateDate = new Date().toISOString();
