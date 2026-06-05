@@ -1,16 +1,11 @@
+const { success, error } = require('../utils/responseHelpers');
 const featureFilters = require('../models/featureFilters.json');
 
 const getAllFeatureFilters = (req, res) => {
-
-    res.status(200).json({
-        success: true,
-        data: featureFilters,
-        error: null
-    });
+    res.status(200).json(success(featureFilters));
 };
 
 const getFeatureFilterById = (req, res) => {
-
     const id = parseInt(req.params.id);
 
     const filter = featureFilters.find(
@@ -18,23 +13,12 @@ const getFeatureFilterById = (req, res) => {
     );
 
     if (!filter) {
-
-        return res.status(404).json({
-            success: false,
-            data: null,
-            error: {
-                code: 'NOT_FOUND',
-                message: 'Feature filter not found',
-                details: {}
-            }
-        });
+        return res.status(404).json(
+            error('NOT_FOUND', 'Feature filter not found')
+        );
     }
 
-    res.status(200).json({
-        success: true,
-        data: filter,
-        error: null
-    });
+    res.status(200).json(success(filter));
 };
 
 module.exports = {
