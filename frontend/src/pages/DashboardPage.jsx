@@ -15,7 +15,7 @@ export default function Dashboard() {
     useEffect(() => {
         const syncUserPreferences = async () => {
             try {
-                const res = await api.get("/api/settings");
+                const res = await api.get("/api/users/me");
                 const backendData = res.data?.data || res.data;
                 
                 if (backendData?.theme) {

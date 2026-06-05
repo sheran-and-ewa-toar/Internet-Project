@@ -1,6 +1,14 @@
 const { success, error } = require('../utils/responseHelpers');
 const users = require('../models/users.json');
 
+const fs = require("fs");
+const path = require("path");
+
+const usersFile = path.join(
+    __dirname,
+    "../models/users.json"
+);
+
 const getAllUsers = (req, res) => {
     res.status(200).json(success(users));
 };
@@ -39,9 +47,26 @@ const getUserById = (req, res) => {
 
 const createUser = (req, res) => {
 
-    const { firstName, lastName, userRole } = req.body;
+    const {
+        firstName,
+        lastName,
+        email,
+        password
+    } = req.body;
 
-    // Generate new ID
+    const existingUser = users.find(
+        u => u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (existingUser) {
+        return res.status(409).json(
+            error(
+                "USER_EXISTS",
+                "Email already registered"
+            )
+        );
+    }
+
     const newUserId =
         users.length > 0
             ? Math.max(...users.map(u => u.userId)) + 1
@@ -51,23 +76,31 @@ const createUser = (req, res) => {
         userId: newUserId,
         firstName,
         lastName,
-        userRole,
+        email,
+        password,
+        userRole: "user",
         createDate: new Date().toISOString(),
-        updateDate: new Date().toISOString()
+        updateDate: new Date().toISOString(),
+        theme: "light"
     };
 
     users.push(newUser);
 
-    res.status(201).json(
+    fs.writeFileSync(
+        usersFile,
+        JSON.stringify(users, null, 2)
+    );
+
+    return res.status(201).json(
         success({
-            message: 'User created successfully',
+            message: "User created successfully",
             userId: newUserId
         })
     );
 };
 
 const updateUser = (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = req.userId;
     const user = users.find((u) => u.userId === id);
 
     if (!user) {
@@ -81,34 +114,70 @@ const updateUser = (req, res) => {
         return res.status(401).json(error('UNAUTHENTICATED', 'Authentication required'));
     }
 
-    if (requesterRole === 'user') {
-        if (requesterId !== id) {
-            return res.status(403).json(
-                error('FORBIDDEN', 'You do not have permission to perform this action.')
-            );
-        }
+    const isSelf = requesterId === id;
+    const isAdmin = requesterRole === 'admin';
+    const isManager = requesterRole === 'manager';
 
-        if (req.body.userRole && req.body.userRole !== user.userRole) {
-            return res.status(403).json(
-                error('FORBIDDEN', 'You do not have permission to perform this action.')
-            );
-        }
+    if (!isSelf && !isAdmin && !isManager) {
+        return res.status(403).json(
+            error('FORBIDDEN', 'You do not have permission to perform this action.')
+        );
     }
 
-    const { firstName, lastName, userRole } = req.body;
+    const {
+        firstName,
+        lastName,
+        email,
+        password,
+        userRole,
+        theme
+    } = req.body;
 
-    user.firstName = firstName;
-    user.lastName = lastName;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const validThemes = ['light', 'dark', 'pink', 'teal'];
 
-    if (requesterRole === 'admin' || requesterRole === 'manager') {
-        if (userRole) {
-            user.userRole = userRole;
-        }
+    if (email !== undefined && !emailRegex.test(email)) {
+        return res.status(400).json(
+            error('VALIDATION_ERROR', 'Invalid email format')
+        );
+    }
+
+    if (password !== undefined && password.length > 0 && password.length < 6) {
+        return res.status(400).json(
+            error('VALIDATION_ERROR', 'Password must be at least 6 characters')
+        );
+    }
+
+    if (theme !== undefined && !validThemes.includes(theme)) {
+        return res.status(400).json(
+            error('VALIDATION_ERROR', 'Invalid theme')
+        );
+    }
+
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (email !== undefined) user.email = email;
+
+    if (password?.trim()) {
+        user.password = password;
+    }
+
+    if ((isAdmin || isManager) && userRole !== undefined) {
+        user.userRole = userRole;
+    }
+
+    if (theme !== undefined) {
+        user.theme = theme;
     }
 
     user.updateDate = new Date().toISOString();
 
-    res.status(200).json(
+    fs.writeFileSync(
+        usersFile,
+        JSON.stringify(users, null, 2)
+    );
+
+    return res.status(200).json(
         success({
             message: 'User updated successfully',
             userId: id

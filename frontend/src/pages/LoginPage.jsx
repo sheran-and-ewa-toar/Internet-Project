@@ -87,12 +87,24 @@ export default function Login({ setAuthenticated }) {
                         onChange={(e) => setPassword(e.target.value)}
                     />
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Logging in..." : "Login"}
-                    </button>
+                    <div className="login-actions">
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? "Logging in..." : "Login"}
+                        </button>
+
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => navigate("/register")}
+                        >
+                            Create Account
+                        </button>
+
+                    </div>
 
                     {error && <div className="login-error">{error}</div>}
                 </form>

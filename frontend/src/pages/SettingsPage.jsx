@@ -11,9 +11,14 @@ const themeOptions = [
 ];
 
 export default function Settings() {
-    const { theme: savedTheme, setTheme: setAppTheme, setUser } = useOutletContext();
+    const { setTheme: setAppTheme, setUser } = useOutletContext();
 
-    const [settings, setSettings] = useState({});
+    const [settings, setSettings] = useState({
+        email: "",
+        password: "",
+        theme: "light"
+    });
+
     const [originalSettings, setOriginalSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -23,23 +28,24 @@ export default function Settings() {
         const fetchSettings = async () => {
             try {
                 setError("");
-                
-                const res = await api.get("/api/settings");
-                
-                const backendData = res.data?.data || res.data;
-                const loadedTheme = backendData.theme || "light";
 
-                const nextSettings = {
-                    username: backendData.username || "",
-                    email: backendData.email || "",
-                    theme: loadedTheme
+                const res = await api.get("/api/settings");
+                const backend = res.data?.data || res.data;
+
+                const next = {
+                    email: backend.email || "",
+                    password: "",
+                    theme: backend.theme || "light"
                 };
 
-                setSettings(nextSettings);
-                setOriginalSettings(nextSettings);
-                setAppTheme?.(loadedTheme);
+                setSettings(next);
+                setOriginalSettings(next);
+
+                setAppTheme?.(next.theme);
+                localStorage.setItem("theme", next.theme);
+
             } catch (err) {
-                setError("Unable to load initial settings profile.");
+                setError("Unable to load settings.");
             } finally {
                 setLoading(false);
             }
@@ -51,10 +57,14 @@ export default function Settings() {
     const validateSettings = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!settings.username?.trim()) return "Username is required.";
-        if (!settings.email?.trim()) return "Email is required.";
+        if (!settings.email.trim()) return "Email is required.";
         if (!emailRegex.test(settings.email)) return "Invalid email.";
-        if (!settings.theme?.trim()) return "Theme is required.";
+
+        if (settings.password && settings.password.length < 6) {
+            return "Password must be at least 6 characters.";
+        }
+
+        if (!settings.theme) return "Theme is required.";
 
         return null;
     };
@@ -72,9 +82,9 @@ export default function Settings() {
         }
 
         const noChange =
-            settings.username === originalSettings.username &&
             settings.email === originalSettings.email &&
-            settings.theme === originalSettings.theme;
+            settings.theme === originalSettings.theme &&
+            !settings.password;
 
         if (noChange) {
             setSuccess("No changes were made.");
@@ -84,37 +94,37 @@ export default function Settings() {
         try {
             setLoading(true);
 
-            // Send the put update to the backend
-            const res = await api.put("/api/settings", settings);
-            
-            const responseData = res.data?.data || res.data;
-            const updatedBackendSettings = responseData?.settings || responseData;
+            const payload = {
+                email: settings.email,
+                theme: settings.theme
+            };
 
-            if (updatedBackendSettings) {
-                const synchronizedData = {
-                    username: updatedBackendSettings.username || "",
-                    email: updatedBackendSettings.email || "",
-                    theme: updatedBackendSettings.theme || "light"
-                };
-
-                setSettings(synchronizedData);
-                setOriginalSettings(synchronizedData);
-                setUser?.((prev) => ({
-                    ...prev,
-                    username: synchronizedData.username,
-                    email: synchronizedData.email
-                }));
-            } else {
-                setOriginalSettings(settings);
-                setUser?.((prev) => ({
-                    ...prev,
-                    username: settings.username,
-                    email: settings.email
-                }));
+            if (settings.password.trim()) {
+                payload.password = settings.password;
             }
 
+            const res = await api.put("/api/settings", payload);
+
+            const updated = res.data?.data || res.data;
+
+            const synced = {
+                email: updated.email || settings.email,
+                theme: updated.theme || settings.theme,
+                password: ""
+            };
+
+            setSettings(synced);
+            setOriginalSettings(synced);
+
+            setUser?.((prev) => ({
+                ...prev,
+                email: synced.email
+            }));
+
+            setAppTheme?.(synced.theme);
+            localStorage.setItem("theme", synced.theme);
+
             setSuccess("Settings updated successfully.");
-            setAppTheme?.(settings.theme);
         } catch (err) {
             setError(
                 err.response?.data?.error?.message ||
@@ -126,71 +136,25 @@ export default function Settings() {
     };
 
     if (loading) {
-        return (
-            <div className="settings-page">
-                <div className="skeleton-settings-container">
-                    {/* Title Segment */}
-                    <div>
-                        <div className="skeleton-pulse" style={{ height: '28px', width: '180px', marginBottom: '8px' }}></div>
-                        <div className="skeleton-pulse" style={{ height: '14px', width: '280px' }}></div>
-                    </div>
-
-                    {/* Form Elements Placeholders */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
-                        {/* Username Block */}
-                        <div>
-                            <div className="skeleton-pulse skeleton-field-label"></div>
-                            <div className="skeleton-pulse skeleton-field-input"></div>
-                        </div>
-
-                        {/* Email Block */}
-                        <div>
-                            <div className="skeleton-pulse skeleton-field-label"></div>
-                            <div className="skeleton-pulse skeleton-field-input"></div>
-                        </div>
-
-                        {/* Theme Selector Block */}
-                        <div>
-                            <div className="skeleton-pulse skeleton-field-label"></div>
-                            <div className="skeleton-pulse skeleton-field-input"></div>
-                        </div>
-
-                        {/* Action Button Placeholder */}
-                        <div className="skeleton-pulse skeleton-settings-btn"></div>
-                    </div>
-                </div>
-            </div>
-        );
-}
+        return <div className="settings-page">Loading...</div>;
+    }
 
     return (
         <div className="settings-page">
-
             <div className="settings-card">
 
                 <h2>⚙️ Settings</h2>
                 <p className="settings-subtitle">
-                    Manage your profile and experiment preferences
+                    Manage your profile and preferences
                 </p>
 
                 <form onSubmit={handleSubmit} className="settings-form">
 
                     <div className="form-group">
-                        <label>Username</label>
-                        <input
-                            type="text"
-                            value={settings.username || ""}
-                            onChange={(e) =>
-                                setSettings({ ...settings, username: e.target.value })
-                            }
-                        />
-                    </div>
-
-                    <div className="form-group">
                         <label>Email</label>
                         <input
                             type="email"
-                            value={settings.email || ""}
+                            value={settings.email}
                             onChange={(e) =>
                                 setSettings({ ...settings, email: e.target.value })
                             }
@@ -198,18 +162,28 @@ export default function Settings() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="settings-theme">Theme</label>
+                        <label>New Password (optional)</label>
+                        <input
+                            type="password"
+                            value={settings.password}
+                            onChange={(e) =>
+                                setSettings({ ...settings, password: e.target.value })
+                            }
+                            placeholder="Leave empty to keep current password"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Theme</label>
                         <select
-                            id="settings-theme"
-                            value={settings.theme || savedTheme || "light"}
-                            onChange={(e) => {
-                                const nextTheme = e.target.value;
-                                setSettings({ ...settings, theme: nextTheme });
-                            }}
+                            value={settings.theme}
+                            onChange={(e) =>
+                                setSettings({ ...settings, theme: e.target.value })
+                            }
                         >
-                            {themeOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
+                            {themeOptions.map((t) => (
+                                <option key={t.value} value={t.value}>
+                                    {t.label}
                                 </option>
                             ))}
                         </select>
@@ -221,10 +195,9 @@ export default function Settings() {
 
                     {error && <div className="error-box">{error}</div>}
                     {success && <div className="success-box">{success}</div>}
+
                 </form>
-
             </div>
-
         </div>
     );
 }

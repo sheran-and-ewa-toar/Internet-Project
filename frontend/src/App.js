@@ -5,6 +5,7 @@ import Login from "./pages/LoginPage";
 import Dashboard from "./pages/DashboardPage";
 import Settings from "./pages/SettingsPage";
 import CreateJob from "./pages/CreateJob";
+import Register from "./pages/Register";
 import Layout from "./components/Layout";
 import api from "./services/api";
 
@@ -50,7 +51,8 @@ export default function App() {
 
                 {/* public route */}
                 <Route path="/login" element={<Login setAuthenticated={setAuthenticated} />} />
-
+                <Route path="/register" element={<Register />}/>
+                
                 {/* protected routes */}
                 <Route
                     path="/"

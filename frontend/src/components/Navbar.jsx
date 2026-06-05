@@ -13,17 +13,27 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
         const fetchUser = async () => {
             try {
                 const res = await api.get("/api/users/me");
-                setLocalUser(res.data.data);
+
+                const user = res.data?.data || res.data;
+
+                setLocalUser({
+                    firstName: user.firstName || "",
+                    lastName: user.lastName || "",
+                    email: user.email || "",
+                    userRole: user.userRole || "user",
+                    theme: user.theme || "light",
+                    userId: user.userId
+                });
             } catch (err) {
                 console.error("Failed to load user", err);
                 setLocalUser(null);
             }
         };
 
-        fetchUser();
+        if (!propUser && !localUser) fetchUser();
     }, [propUser]);
 
-    const user = propUser || localUser;
+    const user = propUser ?? localUser;
     const setUser = propSetUser || setLocalUser;
 
     const logout = async () => {
@@ -44,7 +54,7 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
     return (
         <nav className="navbar">
             <div className="navbar-left">
-                🧬 miRNA Platform
+                🧬 miRNA ML Research
             </div>
 
             <div className="navbar-center">
@@ -56,7 +66,7 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
             <div className="navbar-right">
                 {user && (
                     <span>
-                        👤 {user.username?.trim() || [user.firstName, user.lastName].filter(Boolean).join(" ")}
+                        👤 {[user.firstName, user.lastName].filter(Boolean).join(" ")}
                     </span>
                 )}
 

@@ -28,14 +28,29 @@ router.get(
 
 router.get('/:id', validateParams(['id']), getUserById);
 
-router.post('/', validateBody(['firstName', 'lastName', 'userRole']), createUser);
+router.post(
+    '/',
+    validateBody([
+        'firstName',
+        'lastName',
+        'email',
+        'password'
+    ]),
+    createUser
+);
+
+router.put(
+    "/me",
+    authMiddleware.isAuthenticated,
+    updateUser
+);
 
 router.put(
     '/:id',
     validateParams(['id']),
     authMiddleware.isAuthenticated,
     authMiddleware.authorizeRoles(['admin', 'manager', 'user']),
-    validateBody(['firstName', 'lastName']),
+    validateBody(["firstName", "lastName", "email", "theme"]),
     updateUser
 );
 
