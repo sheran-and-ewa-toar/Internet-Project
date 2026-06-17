@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
 import api from "../services/api";
+import socket from "../services/socket";
 import Card from "../components/Card";
 import DataTable from "../components/DataTable";
 
@@ -73,14 +74,28 @@ export default function Dashboard() {
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchJobs().catch(err => {
-                console.error("Polling failed:", err);
-            });
-        }, 5000); // every 5 seconds
 
-        return () => clearInterval(interval);
-    }, []);
+        const refreshJobs = async () => {
+            try {
+                await fetchJobs();
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        socket.on("job_created", refreshJobs);
+        socket.on("job_status_changed", refreshJobs);
+        socket.on("job_completed", refreshJobs);
+        socket.on("job_failed", refreshJobs);
+
+        return () => {
+            socket.off("job_created", refreshJobs);
+            socket.off("job_status_changed", refreshJobs);
+            socket.off("job_completed", refreshJobs);
+            socket.off("job_failed", refreshJobs);
+        };
+
+    }, []);    
 
     if (loading) return (
         <div className="skeleton-container">

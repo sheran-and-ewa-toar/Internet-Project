@@ -118,8 +118,16 @@ const createJob = async (req, res) => {
         };
 
         jobs.push(job);
+        req.app.get("io").emit("job_created", job);
 
         job.status = "running";
+        req.app.get("io").emit(
+            "job_status_changed",
+            {
+                jobId: job.jobId,
+                status: "running"
+            }
+        );
 
         axios.post("http://localhost:8000/train", {
             jobId: job.jobId,
@@ -134,6 +142,13 @@ const createJob = async (req, res) => {
             const metrics = response.data.metrics || {};
 
             job.status = "completed";
+            req.app.get("io").emit(
+                "job_status_changed",
+                {
+                    jobId: job.jobId,
+                    status: "completed"
+                }
+            );
 
             job.accuracy = Number(metrics.accuracy).toFixed(2) ?? null;
             job.precision = Number(metrics.precision).toFixed(2) ?? null;
@@ -143,15 +158,35 @@ const createJob = async (req, res) => {
             job.cv_std = Number(metrics.cv_std).toFixed(2) ?? null;
 
             job.featureCount = response.data.featureCount ?? null;
+            
+            req.app.get("io").emit(
+                "job_completed",
+                job
+            );
             saveJobs();
         })
         .catch((err) => {
             job.status = "failed";
+            req.app.get("io").emit(
+                "job_status_changed",
+                {
+                    jobId: job.jobId,
+                    status: "failed"
+                }
+            );
             saveJobs();
             job.error =
                 err.response?.data?.detail?.message ||
                 err.message ||
                 "ML service failed";
+
+            req.app.get("io").emit(
+                "job_failed",
+                {
+                    jobId: job.jobId,
+                    error: job.error
+                }
+            );
 
             job.errorTrace =
                 err.response?.data?.detail?.trace || null;

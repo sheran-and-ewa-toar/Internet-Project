@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
 
@@ -14,7 +16,32 @@ const loggerMiddleware = require('./middleware/loggerMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
 
 app.use(express.json());
-app.use(cors());
+
+const corsOptions = {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+};
+
+app.use(cors(corsOptions));
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: corsOptions
+});
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
+
+    socket.emit("connected", {
+        message: "Connected to job updates"
+    });
+
+    socket.on("disconnect", () => {
+        console.log(`Socket disconnected: ${socket.id}`);
+    });
+});
 
 app.use(loggerMiddleware);
 app.use(authMiddleware.attachUserContext);
@@ -29,6 +56,6 @@ app.use('/api/settings', settingsRoutes);
 
 const PORT = 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

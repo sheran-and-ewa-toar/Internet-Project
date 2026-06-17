@@ -51,8 +51,8 @@ router.post(
 );
 
 router.put(
-    '/:job_id',
-    validateParams(['job_id']),
+    '/:id',
+    validateParams(['id']),
     authMiddleware.isAuthenticated,
     authMiddleware.authorizeRoles([
         'manager',
@@ -62,8 +62,8 @@ router.put(
 );
 
 router.delete(
-    '/:job_id',
-    validateParams(['job_id']),
+    '/:id',
+    validateParams(['id']),
     authMiddleware.isAuthenticated,
     authMiddleware.authorizeRoles([
         'admin'
