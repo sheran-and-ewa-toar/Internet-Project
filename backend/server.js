@@ -12,6 +12,7 @@ const featureSetsRoutes = require('./routes/featureSetsRoutes');
 const featureFiltersRoutes = require('./routes/featureFiltersRoutes');
 const authRoutes = require('./routes/authRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const { connectDatabase } = require('./models');
 const loggerMiddleware = require('./middleware/loggerMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -19,7 +20,7 @@ app.use(express.json());
 
 const corsOptions = {
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
 app.use(cors(corsOptions));
@@ -56,6 +57,17 @@ app.use('/api/settings', settingsRoutes);
 
 const PORT = 3000;
 
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+const startServer = async () => {
+    try {
+        await connectDatabase();
+
+        server.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err.message);
+        process.exit(1);
+    }
+};
+
+startServer();

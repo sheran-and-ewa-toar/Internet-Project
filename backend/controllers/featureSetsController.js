@@ -1,24 +1,28 @@
 const { success, error } = require('../utils/responseHelpers');
-const featureSets = require('../models/featureSets.json');
+const { FeatureSet } = require('../models');
 
-const getAllFeatureSets = (req, res) => {
-    res.status(200).json(success(featureSets));
+const getAllFeatureSets = async (req, res) => {
+    try {
+        const featureSets = await FeatureSet.findAll();
+        return res.status(200).json(success(featureSets));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Failed to fetch feature sets'));
+    }
 };
 
-const getFeatureSetById = (req, res) => {
-    const id = parseInt(req.params.id);
+const getFeatureSetById = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const featureSet = await FeatureSet.findByPk(id);
 
-    const featureSet = featureSets.find(
-        f => f.featureSetId === id
-    );
+        if (!featureSet) {
+            return res.status(404).json(error('NOT_FOUND', 'Feature set not found'));
+        }
 
-    if (!featureSet) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'Feature set not found')
-        );
+        return res.status(200).json(success(featureSet));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Failed to fetch feature set'));
     }
-
-    res.status(200).json(success(featureSet));
 };
 
 module.exports = {

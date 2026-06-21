@@ -1,24 +1,36 @@
 const { success, error } = require('../utils/responseHelpers');
-const modelTypes = require('../models/modelTypes.json');
+const { ModelType } = require('../models'); // Centralized ORM models registry
 
-const getAllModelTypes = (req, res) => {
-    res.status(200).json(success(modelTypes));
-};
-
-const getModelTypeById = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const modelType = modelTypes.find(
-        m => m.modelTypeId === id
-    );
-
-    if (!modelType) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'Model type not found')
+// 1. GET ALL MODEL TYPES FROM DB
+const getAllModelTypes = async (req, res) => {
+    try {
+        const modelTypes = await ModelType.findAll();
+        return res.status(200).json(success(modelTypes));
+    } catch (err) {
+        return res.status(500).json(
+            error('INTERNAL_ERROR', 'Failed to retrieve model types: ' + err.message)
         );
     }
+};
 
-    res.status(200).json(success(modelType));
+// 2. GET SPECIFIC MODEL TYPE BY ID FROM DB
+const getModelTypeById = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const modelType = await ModelType.findByPk(id);
+
+        if (!modelType) {
+            return res.status(404).json(
+                error('NOT_FOUND', 'Model type not found')
+            );
+        }
+
+        return res.status(200).json(success(modelType));
+    } catch (err) {
+        return res.status(500).json(
+            error('INTERNAL_ERROR', 'Failed to retrieve model type: ' + err.message)
+        );
+    }
 };
 
 module.exports = {

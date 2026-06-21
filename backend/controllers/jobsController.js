@@ -1,5 +1,5 @@
 const { success, error } = require('../utils/responseHelpers');
-const jobs = require('../models/jobs.json');
+const { Job, User, FeatureFilter, JobFilter, sequelize } = require('../models');
 const axios = require("axios");
 
 const FEATURE_SET_MAP = {
@@ -17,73 +17,74 @@ const MODEL_MAP = {
     2: "XGB"
 };
 
-const fs = require("fs");
-const path = require("path");
+// 1. GET ALL JOBS (With strict role-based visibility filters)
+const getAllJobs = async (req, res) => {
+    try {
+        const role = req.userRole;
+        const userId = req.userId;
 
-const JOBS_PATH = path.join(__dirname, "../models/jobs.json");
+        if (!role) {
+            return res.status(403).json(error('FORBIDDEN', 'Missing user role header.'));
+        }
 
-function saveJobs() {
-    fs.writeFileSync(JOBS_PATH, JSON.stringify(jobs, null, 2));
-}
+        const queryOptions = {
+           order: [['createDate', 'DESC']],
+            attributes: {
+                include: [
+                    // Let MySQL dynamically pull and flatten the threshold values side-by-side
+                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = Job.jobId AND JobFilter.filterId = 1)`), 'pearsonThreshold'],
+                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = Job.jobId AND JobFilter.filterId = 2)`), 'varianceThreshold']
+                ]
+            }
+        };
 
-const getAllJobs = (req, res) => {
-    const role = req.userRole;
-    const userId = req.userId;
 
-    if (!role) {
-        return res.status(403).json(
-            error('FORBIDDEN', 'Missing user role header.')
-        );
+        if (role === 'user') {
+            queryOptions.where = { userId: userId };
+        }
+        
+        // Admin and managers can monitor every pipeline execution record
+        const jobs = await Job.findAll(queryOptions);
+        
+        
+        return res.status(200).json(success(jobs));
+
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Failed to retrieve jobs: ' + err.message));
     }
-
-    if (role === 'user') {
-        const ownJobs = jobs.filter(
-            job => job.userId === userId
-        );
-
-        return res.status(200).json(
-            success(ownJobs)
-        );
-    }
-
-    return res.status(200).json(
-        success(jobs)
-    );
 };
 
-const getJobById = (req, res) => {
-    const id = parseInt(req.params.id);
+// 2. GET JOB BY ID (With safety ownership verification)
+const getJobById = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const job = await Job.findByPk(id, {
+            attributes: {
+                include: [
+                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = ${id} AND JobFilter.filterId = 1)`), 'pearsonThreshold'],
+                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = ${id} AND JobFilter.filterId = 2)`), 'varianceThreshold']]} 
+                });
 
-    const job = jobs.find(
-        j => j.jobId === id
-    );
+        if (!job) {
+            return res.status(404).json(error('NOT_FOUND', 'Job not found'));
+        }
 
-    if (!job) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'Job not found')
-        );
+        // standard users can't see into other accounts' runs
+        if (req.userRole === 'user' && req.userId !== job.userId) {
+            return res.status(403).json(error('FORBIDDEN', 'You do not have permission to view this job.'));
+        }
+
+        return res.status(200).json(success(job));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', err.message));
     }
-
-    if (
-        req.userRole === 'user' &&
-        req.userId !== job.userId
-    ) {
-        return res.status(403).json(
-            error(
-                'FORBIDDEN',
-                'You do not have permission to perform this action.'
-            )
-        );
-    }
-
-    return res.status(200).json(
-        success(job)
-    );
 };
 
+// 3. CREATE JOB (Decoupled threshold parameters to JobFilter table)
 const createJob = async (req, res) => {
     try {
         const userId = req.userId;
+        const io = req.app.get("io"); // Socket.IO reference instance
 
         const {
             featureSetId,
@@ -94,205 +95,152 @@ const createJob = async (req, res) => {
             varianceThreshold
         } = req.body;
 
-        const newId = jobs.length > 0
-            ? Math.max(...jobs.map(j => j.jobId)) + 1
-            : 1;
-
-        const job = {
-            jobId: newId,
+        // Persist the initial queued job row securely to MySQL
+        const job = await Job.create({
             userId,
-            featureSetId,
-            modelTypeId,
+            featureSetId: parseInt(featureSetId),
+            modelTypeId: parseInt(modelTypeId),
+            featureSetName: FEATURE_SET_MAP[featureSetId] || "custom",
+            modelName: MODEL_MAP[modelTypeId] || "Unknown",
+            status: "queued"
+        });
 
-            featureSetName: FEATURE_SET_MAP[featureSetId],
-            modelName: MODEL_MAP[modelTypeId],
-
-            pearsonEnabled: !!pearsonEnabled,
-            pearsonThreshold: pearsonThreshold ?? null,
-
-            varianceEnabled: !!varianceEnabled,
-            varianceThreshold: varianceThreshold ?? null,
-
-            status: "queued",
-            createDate: new Date().toISOString()
-        };
-
-        jobs.push(job);
-        req.app.get("io").emit("job_created", job);
-
-        job.status = "running";
-        req.app.get("io").emit(
-            "job_status_changed",
-            {
+        const bridgeFiltersToCreate = [];
+        if (!!pearsonEnabled && pearsonThreshold !== undefined && pearsonThreshold !== null) {
+            bridgeFiltersToCreate.push({
                 jobId: job.jobId,
-                status: "running"
-            }
-        );
+                filterId: 1, // Primary key identifier for Pearson Correlation in FeatureFilter lookup
+                thresholdValue: parseFloat(pearsonThreshold)
+            });
+        }
+        if (!!varianceEnabled && varianceThreshold !== undefined && varianceThreshold !== null) {
+            bridgeFiltersToCreate.push({
+                jobId: job.jobId,
+                filterId: 2, // Primary key identifier for Variance Threshold in FeatureFilter lookup
+                thresholdValue: parseFloat(varianceThreshold)
+            });
+        }
 
+        if (bridgeFiltersToCreate.length > 0) {
+            await JobFilter.bulkCreate(bridgeFiltersToCreate);
+        }
+
+        // Broadcast initial queue registration status event
+        io.emit("job_created", job.toJSON());
+
+        // Update row status internally to 'running'
+        await job.update({ status: "running", updateDate: new Date() });
+        io.emit("job_status_changed", { jobId: job.jobId, status: "running" });
+
+        // Fire and forget: send asynchronous transaction payload to microRNA training backend
         axios.post("http://localhost:8000/train", {
             jobId: job.jobId,
             feature_set: job.featureSetName,
             model: job.modelName,
-            variance_enabled: job.varianceEnabled,
-            variance_threshold: job.varianceThreshold,
-            pearson_enabled: job.pearsonEnabled,
-            pearson_threshold: job.pearsonThreshold
+            variance_enabled: !!varianceEnabled,
+            variance_threshold: varianceThreshold !== undefined ? parseFloat(varianceThreshold) : 0.01,
+            pearson_enabled: !!pearsonEnabled,
+            pearson_threshold: pearsonThreshold !== undefined ? parseFloat(pearsonThreshold) : 0.9
         })
-        .then((response) => {
+        .then(async (response) => {
             const metrics = response.data.metrics || {};
 
-            job.status = "completed";
-            req.app.get("io").emit(
-                "job_status_changed",
-                {
-                    jobId: job.jobId,
-                    status: "completed"
-                }
-            );
+            // Update parameters using precise data calculations from ML engine response
+            await job.update({
+                status: "completed",
+                accuracy: metrics.accuracy ? parseFloat(Number(metrics.accuracy).toFixed(2)) : null,
+                precision: metrics.precision ? parseFloat(Number(metrics.precision).toFixed(2)) : null,
+                recall: metrics.recall ? parseFloat(Number(metrics.recall).toFixed(2)) : null,
+                f1Score: metrics.f1Score ? parseFloat(Number(metrics.f1Score).toFixed(2)) : null,
+                cv_mean: metrics.cv_mean ? parseFloat(Number(metrics.cv_mean).toFixed(2)) : null,
+                cv_std: metrics.cv_std ? parseFloat(Number(metrics.cv_std).toFixed(2)) : null,
+                featureCount: response.data.featureCount ?? null,
+                updateDate: new Date()
+            });
 
-            job.accuracy = Number(metrics.accuracy).toFixed(2) ?? null;
-            job.precision = Number(metrics.precision).toFixed(2) ?? null;
-            job.recall = Number(metrics.recall).toFixed(2) ?? null;
-            job.f1Score = Number(metrics.f1Score).toFixed(2) ?? null;
-            job.cv_mean = Number(metrics.cv_mean).toFixed(2) ?? null;
-            job.cv_std = Number(metrics.cv_std).toFixed(2) ?? null;
-
-            job.featureCount = response.data.featureCount ?? null;
-            
-            req.app.get("io").emit(
-                "job_completed",
-                job
-            );
-            saveJobs();
+            // Stream confirmation updates instantly to all logged-in client screens
+            io.emit("job_status_changed", { jobId: job.jobId, status: "completed" });
+            io.emit("job_completed", job.toJSON());
         })
-        .catch((err) => {
-            job.status = "failed";
-            req.app.get("io").emit(
-                "job_status_changed",
-                {
-                    jobId: job.jobId,
-                    status: "failed"
-                }
-            );
-            saveJobs();
-            job.error =
-                err.response?.data?.detail?.message ||
-                err.message ||
-                "ML service failed";
+        .catch(async (err) => {
+            const errorMsg = err.response?.data?.detail?.message || err.message || "ML service failed";
+            const errorTrace = err.response?.data?.detail?.trace || null;
 
-            req.app.get("io").emit(
-                "job_failed",
-                {
-                    jobId: job.jobId,
-                    error: job.error
-                }
-            );
+            await job.update({
+                status: "failed",
+                error: errorMsg,
+                errorTrace: errorTrace,
+                updateDate: new Date()
+            });
 
-            job.errorTrace =
-                err.response?.data?.detail?.trace || null;
+            // Stream failures down real-time event pipeline to update dashboard cards
+            io.emit("job_status_changed", { jobId: job.jobId, status: "failed" });
+            io.emit("job_failed", { jobId: job.jobId, error: errorMsg });
         });
 
+        // Immediately respond 201 Created to the client while training processes in the background
         return res.status(201).json(
             success({
-                message: "Job created",
+                message: "Job created successfully and processing in background.",
                 jobId: job.jobId,
-                status: job.status
+                status: "queued"
             })
         );
 
     } catch (err) {
-        return res.status(500).json(
-            error("INTERNAL_ERROR", "Failed to create job")
-        );
+        return res.status(500).json(error("INTERNAL_ERROR", "Failed to compile execution job sequence: " + err.message));
     }
 };
 
-const updateJobById = (req, res) => {
+// 4. UPDATE JOB BY ID
+const updateJobById = async (req, res) => {
+    try {
+        const jobId = parseInt(req.params.job_id);
+        const job = await Job.findByPk(jobId);
 
-    const jobId = parseInt(
-        req.params.job_id
-    );
+        if (!job) {
+            return res.status(404).json(error('NOT_FOUND', 'Job record not found'));
+        }
 
-    const job = jobs.find(
-        j => j.jobId === jobId
-    );
+        const { status, accuracy, precision, recall, f1Score, cv_mean, cv_std } = req.body;
+        const updateFields = {};
 
-    if (!job) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'Job not found')
-        );
+        if (status !== undefined) updateFields.status = status;
+        if (accuracy !== undefined) updateFields.accuracy = accuracy;
+        if (precision !== undefined) updateFields.precision = precision;
+        if (recall !== undefined) updateFields.recall = recall;
+        if (f1Score !== undefined) updateFields.f1Score = f1Score;
+        if (cv_mean !== undefined) updateFields.cv_mean = cv_mean;
+        if (cv_std !== undefined) updateFields.cv_std = cv_std;
+        if (featureCount !== undefined) updateFields.featureCount = featureCount;
+
+        updateFields.updateDate = new Date();
+
+        await job.update(updateFields);
+        return res.status(200).json(success(job));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', err.message));
     }
-
-    const {
-        status,
-        accuracy,
-        precision,
-        recall,
-        f1Score,
-        cv_mean,
-        cv_std
-    } = req.body;
-
-    if (status !== undefined) {
-        job.status = status;
-    }
-
-    if (accuracy !== undefined) {
-        job.accuracy = accuracy;
-    }
-
-    if (precision !== undefined) {
-        job.precision = precision;
-    }
-
-    if (recall !== undefined) {
-        job.recall = recall;
-    }
-
-    if (f1Score !== undefined) {
-        job.f1Score = f1Score;
-    }
-
-    if (cv_mean !== undefined) {
-        job.cv_mean = cv_mean;
-    }
-
-    if (cv_std !== undefined) {
-        job.cv_std = cv_std;
-    }
-
-    job.updateDate =
-        new Date().toISOString();
-
-    return res.status(200).json(
-        success(job)
-    );
 };
 
-const deleteJobById = (req, res) => {
+// 5. DELETE JOB BY ID (Restricted view access layer managed by admin roles in routes)
+const deleteJobById = async (req, res) => {
+    try {
+        const jobId = parseInt(req.params.job_id);
+        
+        // Cascading deletion check: Clean out its bridge entries first before removing parent Job item
+        await JobFilter.destroy({ where: { jobId: jobId } });
+        
+        const deletedCount = await Job.destroy({ where: { jobId: jobId } });
 
-    const jobId = parseInt(
-        req.params.job_id
-    );
+        if (!deletedCount) {
+            return res.status(404).json(error('NOT_FOUND', 'Job record not found'));
+        }
 
-    const jobIndex = jobs.findIndex(
-        j => j.jobId === jobId
-    );
-
-    if (jobIndex === -1) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'Job not found')
-        );
+        return res.status(200).json(success({ message: 'Job record cleared successfully from database.', jobId }));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', err.message));
     }
-
-    jobs.splice(jobIndex, 1);
-
-    return res.status(200).json(
-        success({
-            message: 'Job deleted successfully',
-            jobId
-        })
-    );
 };
 
 module.exports = {

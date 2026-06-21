@@ -1,207 +1,187 @@
 const { success, error } = require('../utils/responseHelpers');
-const users = require('../models/users.json');
+const { User } = require('../models'); // Centralized ORM models configuration interface
+const { Op } = require('sequelize');   // For query operations like case-insensitive filters
 
-const fs = require("fs");
-const path = require("path");
-
-const usersFile = path.join(
-    __dirname,
-    "../models/users.json"
-);
-
-const getAllUsers = (req, res) => {
-    res.status(200).json(success(users));
+// 1. GET ALL USERS
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.findAll();
+        return res.status(200).json(success(users));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Failed to retrieve users: ' + err.message));
+    }
 };
 
-const getCurrentUser = (req, res) => {
+// 2. GET CURRENT LOGGED-IN USER PROFILE Context
+const getCurrentUser = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const user = await User.findByPk(userId);
 
-    const userId = req.userId;
+        if (!user) {
+            return res.status(404).json(error('NOT_FOUND', 'User profile not found.'));
+        }
 
-    const user = users.find(
-        u => u.userId === userId
-    );
-
-    if (!user) {
-        return res.status(404).json(
-            error('NOT_FOUND', 'User not found')
-        );
+        return res.status(200).json(success(user));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', err.message));
     }
-
-    res.status(200).json(
-        success(user)
-    );
 };
 
-const getUserById = (req, res) => {
+// 3. GET SPECIFIC USER BY PK ID
+const getUserById = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const user = await User.findByPk(id);
 
-    const id = parseInt(req.params.id);
+        if (!user) {
+            return res.status(404).json(error('NOT_FOUND', 'User record not found.'));
+        }
 
-    const user = users.find((u) => u.userId === id);
-
-    if (!user) {
-        return res.status(404).json(error('NOT_FOUND', 'User not found'));
+        return res.status(200).json(success(user));
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', err.message));
     }
-
-    res.status(200).json(success(user));
 };
 
-const createUser = (req, res) => {
+// 4. CREATE NEW USER (With uniqueness verification checks)
+const createUser = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password } = req.body;
+        const normalizedPassword = String(password ?? '');
 
-    const {
-        firstName,
-        lastName,
-        email,
-        password
-    } = req.body;
+        if (normalizedPassword.trim().length < 6) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Password must be at least 6 characters.'));
+        }
 
-    const existingUser = users.find(
-        u => u.email.toLowerCase() === email.toLowerCase()
-    );
+        // Perform case-insensitive uniqueness scan on the Email column
+        const existingUser = await User.findOne({
+            where: {
+                email: { [Op.like]: email.trim().toLowerCase() }
+            }
+        });
 
-    if (existingUser) {
-        return res.status(409).json(
-            error(
-                "USER_EXISTS",
-                "Email already registered"
-            )
+        if (existingUser) {
+            return res.status(409).json(error("USER_EXISTS", "Email already registered."));
+        }
+
+        // Build and insert row (Primary Key autoIncrement maps automatically)
+        const newUser = await User.create({
+            firstName,
+            lastName,
+            email: email.trim().toLowerCase(),
+            password: normalizedPassword,
+            userRole: "user",
+            theme: "light",
+            createDate: new Date(),
+            updateDate: new Date()
+        });
+
+        return res.status(201).json(
+            success({
+                message: "User created successfully",
+                userId: newUser.userId
+            })
         );
+    } catch (err) {
+        return res.status(500).json(error("INTERNAL_ERROR", "Failed to create user row: " + err.message));
     }
-
-    const newUserId =
-        users.length > 0
-            ? Math.max(...users.map(u => u.userId)) + 1
-            : 1;
-
-    const newUser = {
-        userId: newUserId,
-        firstName,
-        lastName,
-        email,
-        password,
-        userRole: "user",
-        createDate: new Date().toISOString(),
-        updateDate: new Date().toISOString(),
-        theme: "light"
-    };
-
-    users.push(newUser);
-
-    fs.writeFileSync(
-        usersFile,
-        JSON.stringify(users, null, 2)
-    );
-
-    return res.status(201).json(
-        success({
-            message: "User created successfully",
-            userId: newUserId
-        })
-    );
 };
 
-const updateUser = (req, res) => {
-    const id = req.userId;
-    const user = users.find((u) => u.userId === id);
+// 5. UPDATE EXISTING USER (With multi-role permission logic gatekeeping)
+const updateUser = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id); // Maps to target user parameter id
+        const user = await User.findByPk(id);
 
-    if (!user) {
-        return res.status(404).json(error('NOT_FOUND', 'User not found'));
-    }
+        if (!user) {
+            return res.status(404).json(error('NOT_FOUND', 'User record not found.'));
+        }
 
-    const requesterRole = req.userRole;
-    const requesterId = req.userId;
+        const requesterRole = req.userRole;
+        const requesterId = req.userId;
 
-    if (!requesterRole || !requesterId) {
-        return res.status(401).json(error('UNAUTHENTICATED', 'Authentication required'));
-    }
+        if (!requesterRole || !requesterId) {
+            return res.status(401).json(error('UNAUTHENTICATED', 'Authentication required.'));
+        }
 
-    const isSelf = requesterId === id;
-    const isAdmin = requesterRole === 'admin';
-    const isManager = requesterRole === 'manager';
+        // Authorization checks
+        const isSelf = requesterId === id;
+        const isAdmin = requesterRole === 'admin';
+        const isManager = requesterRole === 'manager';
 
-    if (!isSelf && !isAdmin && !isManager) {
-        return res.status(403).json(
-            error('FORBIDDEN', 'You do not have permission to perform this action.')
+        if (!isSelf && !isAdmin && !isManager) {
+            return res.status(403).json(
+                error('FORBIDDEN', 'You do not have permission to modify this user account.')
+            );
+        }
+
+        const { firstName, lastName, email, password, userRole, theme } = req.body;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const validThemes = ['light', 'dark', 'pink', 'teal'];
+        const normalizedPassword = password === undefined ? undefined : String(password);
+
+        // Input data constraint boundaries evaluations
+        if (email !== undefined && !emailRegex.test(email)) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Invalid email format.'));
+        }
+
+        if (normalizedPassword !== undefined && normalizedPassword.length > 0 && normalizedPassword.length < 6) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Password must be at least 6 characters.'));
+        }
+
+        if (theme !== undefined && !validThemes.includes(theme)) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Invalid theme chosen.'));
+        }
+
+        // Construct properties update payload map dynamically
+        const updateFields = {};
+        if (firstName !== undefined) updateFields.firstName = firstName;
+        if (lastName !== undefined) updateFields.lastName = lastName;
+        if (email !== undefined) updateFields.email = email.trim().toLowerCase();
+        if (normalizedPassword?.trim()) updateFields.password = normalizedPassword;
+        if (theme !== undefined) updateFields.theme = theme;
+
+        // Elevated clearance role assignment authorization rule checks
+        if ((isAdmin || isManager) && userRole !== undefined) {
+            updateFields.userRole = userRole;
+        }
+
+        updateFields.updateDate = new Date();
+
+        // Update target data properties persistently on MySQL
+        await user.update(updateFields);
+
+        return res.status(200).json(
+            success({
+                message: 'User updated successfully',
+                userId: id
+            })
         );
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Update workflow failure: ' + err.message));
     }
-
-    const {
-        firstName,
-        lastName,
-        email,
-        password,
-        userRole,
-        theme
-    } = req.body;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const validThemes = ['light', 'dark', 'pink', 'teal'];
-
-    if (email !== undefined && !emailRegex.test(email)) {
-        return res.status(400).json(
-            error('VALIDATION_ERROR', 'Invalid email format')
-        );
-    }
-
-    if (password !== undefined && password.length > 0 && password.length < 6) {
-        return res.status(400).json(
-            error('VALIDATION_ERROR', 'Password must be at least 6 characters')
-        );
-    }
-
-    if (theme !== undefined && !validThemes.includes(theme)) {
-        return res.status(400).json(
-            error('VALIDATION_ERROR', 'Invalid theme')
-        );
-    }
-
-    if (firstName !== undefined) user.firstName = firstName;
-    if (lastName !== undefined) user.lastName = lastName;
-    if (email !== undefined) user.email = email;
-
-    if (password?.trim()) {
-        user.password = password;
-    }
-
-    if ((isAdmin || isManager) && userRole !== undefined) {
-        user.userRole = userRole;
-    }
-
-    if (theme !== undefined) {
-        user.theme = theme;
-    }
-
-    user.updateDate = new Date().toISOString();
-
-    fs.writeFileSync(
-        usersFile,
-        JSON.stringify(users, null, 2)
-    );
-
-    return res.status(200).json(
-        success({
-            message: 'User updated successfully',
-            userId: id
-        })
-    );
 };
 
-const deleteUser = (req, res) => {
-    const id = parseInt(req.params.id);
+// 6. DELETE USER BY ID
+const deleteUser = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const deletedCount = await User.destroy({ where: { userId: id } });
 
-    const userIndex = users.findIndex((u) => u.userId === id);
+        if (!deletedCount) {
+            return res.status(404).json(error('NOT_FOUND', 'User record not found.'));
+        }
 
-    if (userIndex === -1) {
-        return res.status(404).json(error('NOT_FOUND', 'User not found'));
+        return res.status(200).json(
+            success({
+                message: 'User deleted successfully',
+                userId: id
+            })
+        );
+    } catch (err) {
+        return res.status(500).json(error('INTERNAL_ERROR', 'Delete execution failure: ' + err.message));
     }
-
-    users.splice(userIndex, 1);
-
-    res.status(200).json(
-        success({
-            message: 'User deleted successfully',
-            userId: id
-        })
-    );
 };
 
 module.exports = {
