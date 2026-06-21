@@ -50,7 +50,6 @@ router.put(
     validateParams(['id']),
     authMiddleware.isAuthenticated,
     authMiddleware.authorizeRoles(['admin', 'manager', 'user']),
-    validateBody(["firstName", "lastName", "email", "theme"]),
     updateUser
 );
 

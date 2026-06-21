@@ -195,11 +195,15 @@ const createJob = async (req, res) => {
 // 4. UPDATE JOB BY ID
 const updateJobById = async (req, res) => {
     try {
-        const jobId = parseInt(req.params.job_id);
+        const jobId = parseInt(req.params.id);
         const job = await Job.findByPk(jobId);
 
         if (!job) {
             return res.status(404).json(error('NOT_FOUND', 'Job record not found'));
+        }
+
+        if (isNaN(jobId)) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Invalid job ID'));
         }
 
         const { status, accuracy, precision, recall, f1Score, cv_mean, cv_std } = req.body;
@@ -212,7 +216,6 @@ const updateJobById = async (req, res) => {
         if (f1Score !== undefined) updateFields.f1Score = f1Score;
         if (cv_mean !== undefined) updateFields.cv_mean = cv_mean;
         if (cv_std !== undefined) updateFields.cv_std = cv_std;
-        if (featureCount !== undefined) updateFields.featureCount = featureCount;
 
         updateFields.updateDate = new Date();
 
@@ -226,8 +229,12 @@ const updateJobById = async (req, res) => {
 // 5. DELETE JOB BY ID (Restricted view access layer managed by admin roles in routes)
 const deleteJobById = async (req, res) => {
     try {
-        const jobId = parseInt(req.params.job_id);
+        const jobId = parseInt(req.params.id);
         
+        if (isNaN(jobId)) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Invalid job ID'));
+        }
+
         // Cascading deletion check: Clean out its bridge entries first before removing parent Job item
         await JobFilter.destroy({ where: { jobId: jobId } });
         
