@@ -69,7 +69,9 @@ export default function CreateJob() {
             }, 1200);
 
         } catch (err) {
-            setError("Failed to create job");
+            const backendMessage = err.response?.data?.error?.message;
+            const fallbackMessage = err.response?.data?.message || err.message;
+            setError(backendMessage || fallbackMessage || "Failed to create job");
         } finally {
             setLoading(false);
         }

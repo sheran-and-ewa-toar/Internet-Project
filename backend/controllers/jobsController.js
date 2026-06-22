@@ -80,7 +80,6 @@ const getJobById = async (req, res) => {
     }
 };
 
-// 3. CREATE JOB (Decoupled threshold parameters to JobFilter table)
 const createJob = async (req, res) => {
     try {
         const userId = req.userId;
@@ -94,6 +93,25 @@ const createJob = async (req, res) => {
             varianceEnabled,
             varianceThreshold
         } = req.body;
+        
+        // check for required fields
+        if (!featureSetId || !modelTypeId) {
+            return res.status(400).json(error('VALIDATION_ERROR', 'Missing required fields: featureSetId and modelTypeId are mandatory.'));
+        }
+
+        if (pearsonEnabled) {
+            const parsedPearson = parseFloat(pearsonThreshold);
+            if (pearsonThreshold === undefined || pearsonThreshold === null || pearsonThreshold === "" || isNaN(parsedPearson)) {
+                return res.status(400).json(error('VALIDATION_ERROR', 'A valid numerical Pearson threshold must be provided when Pearson filter is enabled.'));
+            }
+        }
+
+        if (varianceEnabled) {
+            const parsedVariance = parseFloat(varianceThreshold);
+            if (varianceThreshold === undefined || varianceThreshold === null || varianceThreshold === "" || isNaN(parsedVariance)) {
+                return res.status(400).json(error('VALIDATION_ERROR', 'A valid numerical Variance threshold must be provided when Variance filter is enabled.'));
+            }
+        }
 
         // Persist the initial queued job row securely to MySQL
         const job = await Job.create({
