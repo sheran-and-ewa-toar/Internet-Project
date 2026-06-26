@@ -1,78 +1,105 @@
 import "../styles/Card.css";
+import api from "../services/api";
+import { useState } from "react";
 
-export default function Card({ job }) {
-if (!job) return null;
+export default function Card({ job, onDelete }) {
+    const [loading, setLoading] = useState(false);
 
-const status = job.status || "queued";
+    if (!job) return null;
 
-const getFilterValue = (shortName) => {
-    const filter = job.appliedFilters?.find(f => f.shortName === shortName);
-    return filter?.JobFilter?.thresholdValue ?? null;
-};
+    const status = job.status || "queued";
 
-const pearsonThreshold = getFilterValue("pearson");
-const varianceThreshold = getFilterValue("variance");
+    const getFilterValue = (shortName) => {
+        const filter = job.appliedFilters?.find(f => f.shortName === shortName);
+        return filter?.JobFilter?.thresholdValue ?? null;
+    };
 
-const safe = (v) => v ?? "-";
+    const pearsonThreshold = getFilterValue("pearson");
+    const varianceThreshold = getFilterValue("variance");
 
-return (
-    <div className="job-card">
+    const safe = (v) => v ?? "-";
 
-        <div className="job-card-header">
-            <h3>Job #{job.jobId}</h3>
+    const handleDelete = async () => {
+        const ok = window.confirm(`Delete Job #${job.jobId}?`);
+        if (!ok) return;
 
-            <div className="job-meta">
-                <span className="job-date">
-                    {new Date(job.createDate).toLocaleDateString()}
-                </span>
+        try {
+            setLoading(true);
+            await api.delete(`/api/jobs/${job.jobId}`);
+            onDelete?.(job.jobId); // notify parent to refresh UI
+        } catch (err) {
+            console.error("Failed to delete job", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-                <span className={`status-badge ${status}`}>
-                    {status}
-                </span>
+    return (
+        <div className="job-card">
+
+            <div className="job-card-header">
+                <h3>Job #{job.jobId}</h3>
+
+                <div className="job-meta">
+                    <span className="job-date">
+                        {new Date(job.createDate).toLocaleDateString()}
+                    </span>
+
+                    <span className={`status-badge ${status}`}>
+                        {status}
+                    </span>
+                </div>
             </div>
-        </div>
 
-        <div className="card-section">
-            <h4>Configuration</h4>
+            <div className="card-section">
+                <h4>Configuration</h4>
 
-            <p><strong>Feature Set:</strong> {job.featureSetName}</p>
-            <p><strong>Model:</strong> {job.modelName}</p>
+                <p><strong>Feature Set:</strong> {job.featureSetName}</p>
+                <p><strong>Model:</strong> {job.modelName}</p>
 
-            <p>
-                <strong>Pearson Filter:</strong>{" "}
-                {pearsonThreshold !== null ? pearsonThreshold : "Disabled"}
-            </p>
+                <p>
+                    <strong>Pearson Filter:</strong>{" "}
+                    {pearsonThreshold !== null ? pearsonThreshold : "Disabled"}
+                </p>
 
-            <p>
-                <strong>Variance Filter:</strong>{" "}
-                {varianceThreshold !== null ? varianceThreshold : "Disabled"}
-            </p>
-        </div>
-
-        <div className="card-section">
-            <h4>Results</h4>
-
-            <p><strong>Accuracy:</strong> {safe(job.accuracy)}</p>
-            <p><strong>Precision:</strong> {safe(job.precision)}</p>
-            <p><strong>Recall:</strong> {safe(job.recall)}</p>
-            <p><strong>F1 Score:</strong> {safe(job.f1Score)}</p>
-            <p><strong>CV Mean:</strong> {safe(job.cv_mean)}</p>
-            <p><strong>CV Std:</strong> {safe(job.cv_std)}</p>
-        </div>
-
-        {status === "failed" && (
-            <div className="job-error">
-                <strong>Job failed:</strong>
-                <div>{job.error || "Unknown error"}</div>
+                <p>
+                    <strong>Variance Filter:</strong>{" "}
+                    {varianceThreshold !== null ? varianceThreshold : "Disabled"}
+                </p>
             </div>
-        )}
 
-        {status === "running" && (
-            <div className="job-running">
-                🔄 Training model...
+            <div className="card-section">
+                <h4>Results</h4>
+
+                <p><strong>Accuracy:</strong> {safe(job.accuracy)}</p>
+                <p><strong>Precision:</strong> {safe(job.precision)}</p>
+                <p><strong>Recall:</strong> {safe(job.recall)}</p>
+                <p><strong>F1 Score:</strong> {safe(job.f1Score)}</p>
+                <p><strong>CV Mean:</strong> {safe(job.cv_mean)}</p>
+                <p><strong>CV Std:</strong> {safe(job.cv_std)}</p>
             </div>
-        )}
 
-    </div>
-);
+            {status === "failed" && (
+                <div className="job-error">
+                    <strong>Job failed:</strong>
+                    <div>{job.error || "Unknown error"}</div>
+                </div>
+            )}
+
+            {status === "running" && (
+                <div className="job-running">
+                    🔄 Training model...
+                </div>
+            )}
+
+            <button
+                className="delete-btn"
+                onClick={handleDelete}
+                disabled={loading}
+            >
+                {loading ? "Deleting..." : "🗑 Delete"}
+            </button>
+
+        </div>
+    );
 }

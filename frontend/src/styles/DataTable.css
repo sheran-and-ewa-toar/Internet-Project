@@ -22,3 +22,15 @@
 .status-queued {
     background: #ef6c00;
 }
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #ff4d4f;
+}
+
+.delete-btn:hover {
+    transform: scale(1.1);
+}

@@ -88,11 +88,16 @@ export default function Dashboard() {
         socket.on("job_completed", refreshJobs);
         socket.on("job_failed", refreshJobs);
 
+        socket.on("job_deleted", (payload) => {
+            setJobs(prev => prev.filter(j => j.jobId !== payload.jobId));
+        });
+
         return () => {
             socket.off("job_created", refreshJobs);
             socket.off("job_status_changed", refreshJobs);
             socket.off("job_completed", refreshJobs);
             socket.off("job_failed", refreshJobs);
+            socket.off("job_deleted");
         };
 
     }, []);    

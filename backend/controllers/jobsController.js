@@ -283,26 +283,54 @@ const updateJobById = async (req, res) => {
 
 // 5. DELETE JOB BY ID (Restricted view access layer managed by admin roles in routes)
 const deleteJobById = async (req, res) => {
-    try {
-        const jobId = parseInt(req.params.id);
-        
-        if (isNaN(jobId)) {
-            return res.status(400).json(error('VALIDATION_ERROR', 'Invalid job ID'));
-        }
+try {
+    const jobId = parseInt(req.params.id);
 
-        // Cascading deletion check: Clean out its bridge entries first before removing parent Job item
-        await JobFilter.destroy({ where: { jobId: jobId } });
-        
-        const deletedCount = await Job.destroy({ where: { jobId: jobId } });
-
-        if (!deletedCount) {
-            return res.status(404).json(error('NOT_FOUND', 'Job record not found'));
-        }
-
-        return res.status(200).json(success({ message: 'Job record cleared successfully from database.', jobId }));
-    } catch (err) {
-        return res.status(500).json(error('INTERNAL_ERROR', err.message));
+    if (isNaN(jobId)) {
+        return res.status(400).json(
+            error('VALIDATION_ERROR', 'Invalid job ID')
+        );
     }
+
+    const job = await Job.findByPk(jobId);
+
+    if (!job) {
+        return res.status(404).json(
+            error('NOT_FOUND', 'Job record not found')
+        );
+    }
+
+    const isOwner = job.userId === req.userId;
+    const isAdmin = req.userRole === 'admin';
+
+    if (!isOwner && !isAdmin) {
+        return res.status(403).json(
+            error('FORBIDDEN', 'You do not have permission to delete this job')
+        );
+    }
+
+    const io = req.app.get("io");
+
+    await sequelize.transaction(async (t) => {
+        await JobFilter.destroy({ where: { jobId }, transaction: t });
+        await Job.destroy({ where: { jobId }, transaction: t });
+    });
+
+    // Deletion event
+    io.emit("job_deleted", { jobId });
+
+    return res.status(200).json(
+        success({
+            message: 'Job deleted successfully',
+            jobId
+        })
+    );
+
+} catch (err) {
+    return res.status(500).json(
+        error('INTERNAL_ERROR', err.message)
+    );
+}
 };
 
 module.exports = {
