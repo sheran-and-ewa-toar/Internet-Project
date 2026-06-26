@@ -1,70 +1,78 @@
 import "../styles/Card.css";
 
 export default function Card({ job }) {
-    if (!job) return null;
+if (!job) return null;
 
-    const status = job.status || "queued";
+const status = job.status || "queued";
 
-    const safe = (v) => v ?? "-";
+const getFilterValue = (shortName) => {
+    const filter = job.appliedFilters?.find(f => f.shortName === shortName);
+    return filter?.JobFilter?.thresholdValue ?? null;
+};
 
-    return (
-        <div className="job-card">
+const pearsonThreshold = getFilterValue("pearson");
+const varianceThreshold = getFilterValue("variance");
 
-            <div className="job-card-header">
-                <h3>Job #{job.jobId}</h3>
+const safe = (v) => v ?? "-";
 
-                <div className="job-meta">
-                    <span className="job-date">
-                        {new Date(job.createDate).toLocaleDateString()}
-                    </span>
+return (
+    <div className="job-card">
 
-                    <span className={`status-badge ${status}`}>
-                        {status}
-                    </span>
-                </div>
+        <div className="job-card-header">
+            <h3>Job #{job.jobId}</h3>
+
+            <div className="job-meta">
+                <span className="job-date">
+                    {new Date(job.createDate).toLocaleDateString()}
+                </span>
+
+                <span className={`status-badge ${status}`}>
+                    {status}
+                </span>
             </div>
-
-            <div className="card-section">
-                <h4>Configuration</h4>
-
-                <p><strong>Feature Set:</strong> {job.featureSetName}</p>
-                <p><strong>Model:</strong> {job.modelName}</p>
-
-                <p>
-                    <strong>Pearson Filter:</strong>{" "}
-                    {job.pearsonEnabled ? job.pearsonThreshold : "Disabled"}
-                </p>
-
-                <p>
-                    <strong>Variance Filter:</strong>{" "}
-                    {job.varianceEnabled ? job.varianceThreshold : "Disabled"}
-                </p>
-            </div>
-
-            <div className="card-section">
-                <h4>Results</h4>
-
-                <p><strong>Accuracy:</strong> {safe(job.accuracy)}</p>
-                <p><strong>Precision:</strong> {safe(job.precision)}</p>
-                <p><strong>Recall:</strong> {safe(job.recall)}</p>
-                <p><strong>F1 Score:</strong> {safe(job.f1Score)}</p>
-                <p><strong>CV Mean:</strong> {safe(job.cv_mean)}</p>
-                <p><strong>CV Std:</strong> {safe(job.cv_std)}</p>
-            </div>
-
-            {status === "failed" && (
-                <div className="job-error">
-                    <strong>Job failed:</strong>
-                    <div>{job.error || "Unknown error"}</div>
-                </div>
-            )}
-
-            {status === "running" && (
-                <div className="job-running">
-                    🔄 Training model...
-                </div>
-            )}
-
         </div>
-    );
+
+        <div className="card-section">
+            <h4>Configuration</h4>
+
+            <p><strong>Feature Set:</strong> {job.featureSetName}</p>
+            <p><strong>Model:</strong> {job.modelName}</p>
+
+            <p>
+                <strong>Pearson Filter:</strong>{" "}
+                {pearsonThreshold !== null ? pearsonThreshold : "Disabled"}
+            </p>
+
+            <p>
+                <strong>Variance Filter:</strong>{" "}
+                {varianceThreshold !== null ? varianceThreshold : "Disabled"}
+            </p>
+        </div>
+
+        <div className="card-section">
+            <h4>Results</h4>
+
+            <p><strong>Accuracy:</strong> {safe(job.accuracy)}</p>
+            <p><strong>Precision:</strong> {safe(job.precision)}</p>
+            <p><strong>Recall:</strong> {safe(job.recall)}</p>
+            <p><strong>F1 Score:</strong> {safe(job.f1Score)}</p>
+            <p><strong>CV Mean:</strong> {safe(job.cv_mean)}</p>
+            <p><strong>CV Std:</strong> {safe(job.cv_std)}</p>
+        </div>
+
+        {status === "failed" && (
+            <div className="job-error">
+                <strong>Job failed:</strong>
+                <div>{job.error || "Unknown error"}</div>
+            </div>
+        )}
+
+        {status === "running" && (
+            <div className="job-running">
+                🔄 Training model...
+            </div>
+        )}
+
+    </div>
+);
 }
