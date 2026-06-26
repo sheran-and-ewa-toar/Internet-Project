@@ -24,33 +24,43 @@ const getAllJobs = async (req, res) => {
         const userId = req.userId;
 
         if (!role) {
-            return res.status(403).json(error('FORBIDDEN', 'Missing user role header.'));
+            return res
+                .status(403)
+                .json(error('FORBIDDEN', 'Missing user role header.'));
         }
 
         const queryOptions = {
-           order: [['createDate', 'DESC']],
-            attributes: {
-                include: [
-                    // Let MySQL dynamically pull and flatten the threshold values side-by-side
-                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = Job.jobId AND JobFilter.filterId = 1)`), 'pearsonThreshold'],
-                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = Job.jobId AND JobFilter.filterId = 2)`), 'varianceThreshold']
-                ]
-            }
+            order: [['jobId', 'DESC']],
+
+            include: [
+                {
+                    model: FeatureFilter,
+                    as: "appliedFilters",
+                    attributes: [
+                        "filterId",
+                        "name",
+                        "shortName"
+                    ],
+                    through: {
+                        attributes: ["thresholdValue"]
+                    }
+                }
+            ]
         };
 
-
+        // role-based filtering
         if (role === 'user') {
-            queryOptions.where = { userId: userId };
+            queryOptions.where = { userId };
         }
-        
-        // Admin and managers can monitor every pipeline execution record
+
         const jobs = await Job.findAll(queryOptions);
-        
-        
+
         return res.status(200).json(success(jobs));
 
     } catch (err) {
-        return res.status(500).json(error('INTERNAL_ERROR', 'Failed to retrieve jobs: ' + err.message));
+        return res.status(500).json(
+            error('INTERNAL_ERROR', 'Failed to retrieve jobs: ' + err.message)
+        );
     }
 };
 
@@ -58,25 +68,52 @@ const getAllJobs = async (req, res) => {
 const getJobById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
+
+        if (isNaN(id)) {
+            return res
+                .status(400)
+                .json(error('VALIDATION_ERROR', 'Invalid job id'));
+        }
+
         const job = await Job.findByPk(id, {
-            attributes: {
-                include: [
-                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = ${id} AND JobFilter.filterId = 1)`), 'pearsonThreshold'],
-                    [sequelize.literal(`(SELECT thresholdValue FROM JobFilter WHERE JobFilter.jobId = ${id} AND JobFilter.filterId = 2)`), 'varianceThreshold']]} 
-                });
+            include: [
+                {
+                    model: FeatureFilter,
+                    as: "appliedFilters",
+                    attributes: [
+                        "filterId",
+                        "name",
+                        "shortName"
+                    ],
+                    through: {
+                        attributes: ["thresholdValue"]
+                    }
+                }
+            ]
+        });
 
         if (!job) {
-            return res.status(404).json(error('NOT_FOUND', 'Job not found'));
+            return res
+                .status(404)
+                .json(error('NOT_FOUND', 'Job not found'));
         }
 
         // standard users can't see into other accounts' runs
         if (req.userRole === 'user' && req.userId !== job.userId) {
-            return res.status(403).json(error('FORBIDDEN', 'You do not have permission to view this job.'));
+            return res
+                .status(403)
+                .json(error(
+                    'FORBIDDEN',
+                    'You do not have permission to view this job.'
+                ));
         }
 
         return res.status(200).json(success(job));
+
     } catch (err) {
-        return res.status(500).json(error('INTERNAL_ERROR', err.message));
+        return res
+            .status(500)
+            .json(error('INTERNAL_ERROR', err.message));
     }
 };
 

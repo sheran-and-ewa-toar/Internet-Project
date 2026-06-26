@@ -136,7 +136,11 @@ export default function Dashboard() {
         modelName:
             modelTypes.find(m =>
                 Number(m.modelTypeId) === Number(job.modelTypeId)
-            )?.name || `Model ${job.modelTypeId}`
+            )?.name || `Model ${job.modelTypeId}`,
+
+        // derive flags from backend data
+        pearsonEnabled: job.pearsonThreshold != null,
+        varianceEnabled: job.varianceThreshold != null
     }));
 
     const recentJobs = [...enrichedJobs]
