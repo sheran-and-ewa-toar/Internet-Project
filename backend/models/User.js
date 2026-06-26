@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         hooks: {
-            beforeValidate: (user) => {
+            beforeCreate: (user) => {
                 if (!user.password || isPasswordHash(user.password)) {
                     return;
                 }
