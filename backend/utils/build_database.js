@@ -127,7 +127,7 @@ const runMasterPipeline = async () => {
         console.log("✅ Core lookup tables successfully populated.");
 
         console.log("🔒 Registering system user profiles (auto-hashed)...");
-        await User.bulkCreate(usersData, { validate: true });    
+        await User.bulkCreate(usersData, { validate: true, individualHooks: true });  
         console.log(`✅ Loaded ${usersData.length} user profile contexts.`);
 
         console.log(`🌱 Processing ${jobData.length} historical training logs...`);
