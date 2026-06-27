@@ -66,6 +66,8 @@ router.delete(
     validateParams(['id']),
     authMiddleware.isAuthenticated,
     authMiddleware.authorizeRoles([
+        'user',
+        'manager',
         'admin'
     ]),
     deleteJobById

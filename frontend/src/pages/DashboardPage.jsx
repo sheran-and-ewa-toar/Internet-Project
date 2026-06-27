@@ -4,6 +4,7 @@ import api from "../services/api";
 import socket from "../services/socket";
 import Card from "../components/Card";
 import DataTable from "../components/DataTable";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function Dashboard() {
     const [jobs, setJobs] = useState([]);
@@ -13,27 +14,28 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [jobToDelete, setJobToDelete] = useState(null);
+
     useEffect(() => {
         const syncUserPreferences = async () => {
             try {
                 const res = await api.get("/api/users/me");
                 const backendData = res.data?.data || res.data;
-                
+
                 if (backendData?.theme) {
-                    
                     document.documentElement.dataset.theme = backendData.theme;
-                    document.documentElement.style.colorScheme = 
+                    document.documentElement.style.colorScheme =
                         backendData.theme === "dark" ? "dark" : "light";
+
                     localStorage.setItem("appTheme", backendData.theme);
                 }
             } catch (err) {
-                console.error("Could not sync user styling parameters on dashboard load", err);
+                console.error("Theme sync failed", err);
             }
         };
 
         syncUserPreferences();
     }, []);
-
 
     const fetchMeta = async () => {
         const [fsRes, mtRes] = await Promise.all([
@@ -48,6 +50,7 @@ export default function Dashboard() {
     const fetchJobs = async () => {
         const jobsRes = await api.get("/api/jobs");
         const safeJobs = jobsRes.data?.data ?? jobsRes.data ?? [];
+
         setJobs(Array.isArray(safeJobs) ? safeJobs : []);
     };
 
@@ -57,11 +60,7 @@ export default function Dashboard() {
                 setLoading(true);
                 setError("");
 
-                await Promise.all([
-                    fetchMeta(),
-                    fetchJobs()
-                ]);
-
+                await Promise.all([fetchMeta(), fetchJobs()]);
             } catch (err) {
                 console.error(err);
                 setError("Failed to load dashboard data");
@@ -74,7 +73,6 @@ export default function Dashboard() {
     }, []);
 
     useEffect(() => {
-
         const refreshJobs = async () => {
             try {
                 await fetchJobs();
@@ -94,20 +92,33 @@ export default function Dashboard() {
             socket.off("job_completed", refreshJobs);
             socket.off("job_failed", refreshJobs);
         };
+    }, []);
 
-    }, []);    
+    const handleDelete = async () => {
+        if (!jobToDelete) return;
+
+        try {
+            await api.delete(`/api/jobs/${jobToDelete.jobId}`);
+
+            setJobs(prev =>
+                prev.filter(j => j.jobId !== jobToDelete.jobId)
+            );
+        } catch (err) {
+            console.error("Delete failed", err);
+        } finally {
+            setJobToDelete(null);
+        }
+    };
 
     if (loading) return (
         <div className="skeleton-container">
-            { }
             <div className="dashboard-header">
                 <div className="skeleton-pulse skeleton-title"></div>
                 <div className="skeleton-pulse skeleton-subtitle"></div>
             </div>
 
-            { }
             <section className="dashboard-section">
-                <div className="skeleton-pulse skeleton-section-heading" style={{ marginBottom: '15px' }}></div>
+                <div className="skeleton-pulse skeleton-section-heading"></div>
                 <div className="skeleton-grid">
                     <div className="skeleton-pulse skeleton-card"></div>
                     <div className="skeleton-pulse skeleton-card"></div>
@@ -115,16 +126,15 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            { }
             <section className="dashboard-section">
-                <div className="skeleton-pulse skeleton-section-heading" style={{ marginBottom: '15px' }}></div>
+                <div className="skeleton-pulse skeleton-section-heading"></div>
                 <div className="skeleton-pulse skeleton-table"></div>
             </section>
         </div>
     );
+
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
-    
     const enrichedJobs = (jobs || []).map(job => ({
         ...job,
 
@@ -136,11 +146,7 @@ export default function Dashboard() {
         modelName:
             modelTypes.find(m =>
                 Number(m.modelTypeId) === Number(job.modelTypeId)
-            )?.name || `Model ${job.modelTypeId}`,
-
-        // derive flags from backend data
-        pearsonEnabled: job.pearsonThreshold != null,
-        varianceEnabled: job.varianceThreshold != null
+            )?.name || `Model ${job.modelTypeId}`
     }));
 
     const recentJobs = [...enrichedJobs]
@@ -171,7 +177,11 @@ export default function Dashboard() {
                 ) : (
                     <div className="cards-grid">
                         {recentJobs.map(job => (
-                            <Card key={job.jobId} job={job} />
+                            <Card
+                                key={job.jobId}
+                                job={job}
+                                onDeleteClick={setJobToDelete}
+                            />
                         ))}
                     </div>
                 )}
@@ -179,11 +189,28 @@ export default function Dashboard() {
 
             <section className="dashboard-section">
                 <h2>Training History</h2>
-                <DataTable jobs={enrichedJobs} />
+
+                <DataTable
+                    jobs={enrichedJobs}
+                    onDeleteClick={setJobToDelete}
+                />
+
                 <div className="jobs-count">
                     Total jobs: {enrichedJobs.length}
                 </div>
             </section>
+
+            <ConfirmModal
+                isOpen={!!jobToDelete}
+                title="Delete Job"
+                message={
+                    jobToDelete
+                        ? `Are you sure you want to delete Job #${jobToDelete.jobId}?`
+                        : ""
+                }
+                onConfirm={handleDelete}
+                onCancel={() => setJobToDelete(null)}
+            />
 
         </div>
     );
