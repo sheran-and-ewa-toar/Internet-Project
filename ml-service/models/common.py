@@ -37,6 +37,10 @@ def load_dataset_from_db():
     # 3. Pivot long records into machine-learning-ready wide feature columns
     df_pivoted = df_features.pivot(index='mirnaId', columns='featureName', values='featureValue')
     
+    if 'label' in df_pivoted.columns:
+        print("INFO: Found and removed redundant 'label' column from MiRnaFeatureValue.")
+        df_pivoted = df_pivoted.drop(columns=['label'])
+
     # 4. Merge pivoted features onto ground truth rows
     df = df_mirna.set_index('id').join(df_pivoted, how='inner')
     

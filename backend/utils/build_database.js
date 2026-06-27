@@ -72,6 +72,7 @@ const ingestDataset = (filePath, isPositiveDataset) => {
                             if (
                                 key !== 'mirbase_id' && 
                                 key !== 'mirgenedb_id' && 
+                                key !== 'label' &&  // ◄--- SKIP 'label' COLUMN!
                                 key !== 'name' && 
                                 cleanValue !== '' && 
                                 cleanValue !== 'NaN' &&  // ◄--- SKIP 'NaN' STRINGS!
