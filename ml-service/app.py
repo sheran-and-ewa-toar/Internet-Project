@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import HTTPException
+import requests
+import os
 import traceback
 
 from feature_sets import FEATURE_SETS
@@ -13,6 +15,8 @@ from models.common import (
 
 from models.rf import train_rf
 from models.xgb import train_xgb
+
+NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL", "http://localhost:3000")
 
 
 class TrainRequest(BaseModel):
@@ -31,10 +35,27 @@ DATA_POS = "data/positive_dataset.csv"
 DATA_NEG = "data/negative_dataset.csv"
 
 @app.post("/train")
-def train(job: TrainRequest):
+def train(job: TrainRequest,background_tasks: BackgroundTasks):
     try:
-        df = load_dataset(DATA_POS, DATA_NEG)
+        background_tasks.add_task(run_training_pipeline, job)
+        return {"status": "Processing initialized"}
+    except Exception as e:
+        error_details = traceback.format_exc()
+        print("TRAINING FAILED:")
+        print(error_details)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": str(e),
+                "trace": error_details
+            }
+        )
 
+def run_training_pipeline(job):
+    try:
+        df = load_dataset_from_db()
+        # df = load_dataset(DATA_POS, DATA_NEG)
+        
         features = FEATURE_SETS[job.feature_set]
 
         X, y = prepare_features(
@@ -57,13 +78,16 @@ def train(job: TrainRequest):
         else:
             raise Exception("Unsupported model")
 
-        return {
+        payload = {
             "success": True,
             "metrics": metrics,
             "featureCount": len(X.columns)
         }
-
+        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload)
+        
     except Exception as e:
+        # Send failure callback to update dashboard status card to 'failed'
+        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={"status": "failed"})
         error_details = traceback.format_exc()
 
         print("TRAINING FAILED:")

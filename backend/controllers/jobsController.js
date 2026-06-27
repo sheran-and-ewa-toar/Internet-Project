@@ -2,6 +2,8 @@ const { success, error } = require('../utils/responseHelpers');
 const { Job, User, FeatureFilter, JobFilter, sequelize } = require('../models');
 const axios = require("axios");
 
+const FASTAPI_URL = process.env.FASTAPI_SERVICE_URL || "http://localhost:8000";
+
 const FEATURE_SET_MAP = {
     1: "1d",
     2: "2d",
@@ -188,7 +190,7 @@ const createJob = async (req, res) => {
         io.emit("job_status_changed", { jobId: job.jobId, status: "running" });
 
         // Fire and forget: send asynchronous transaction payload to microRNA training backend
-        axios.post("http://localhost:8000/train", {
+        axios.post(`${FASTAPI_URL}/train`, {
             jobId: job.jobId,
             feature_set: job.featureSetName,
             model: job.modelName,
