@@ -1,16 +1,14 @@
 import "../styles/Card.css";
-import api from "../services/api";
-import { useState } from "react";
 
-export default function Card({ job, onDelete }) {
-    const [loading, setLoading] = useState(false);
-
+export default function Card({ job, onDeleteClick }) {
     if (!job) return null;
 
     const status = job.status || "queued";
 
     const getFilterValue = (shortName) => {
-        const filter = job.appliedFilters?.find(f => f.shortName === shortName);
+        const filter = job.appliedFilters?.find(
+            f => f.shortName === shortName
+        );
         return filter?.JobFilter?.thresholdValue ?? null;
     };
 
@@ -18,21 +16,6 @@ export default function Card({ job, onDelete }) {
     const varianceThreshold = getFilterValue("variance");
 
     const safe = (v) => v ?? "-";
-
-    const handleDelete = async () => {
-        const ok = window.confirm(`Delete Job #${job.jobId}?`);
-        if (!ok) return;
-
-        try {
-            setLoading(true);
-            await api.delete(`/api/jobs/${job.jobId}`);
-            onDelete?.(job.jobId); // notify parent to refresh UI
-        } catch (err) {
-            console.error("Failed to delete job", err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="job-card">
@@ -94,10 +77,9 @@ export default function Card({ job, onDelete }) {
 
             <button
                 className="delete-btn"
-                onClick={handleDelete}
-                disabled={loading}
+                onClick={() => onDeleteClick(job)}
             >
-                {loading ? "Deleting..." : "🗑 Delete"}
+                🗑️ Delete
             </button>
 
         </div>
