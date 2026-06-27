@@ -61,6 +61,7 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/settings">Settings</Link>
                 <Link to="/create-job">New Job</Link>
+                <Link to="/about">About</Link>
             </div>
 
             <div className="navbar-right">

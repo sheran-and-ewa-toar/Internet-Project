@@ -1,0 +1,50 @@
+.about-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.about-header {
+    margin-bottom: 32px;
+}
+
+.about-header h1 {
+    margin-bottom: 8px;
+}
+
+.about-header p {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.about-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+}
+
+.about-section h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.about-section p {
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.pipeline-list {
+    padding-left: 20px;
+}
+
+.pipeline-list li {
+    margin-bottom: 16px;
+}
+
+.pipeline-list p {
+    margin: 6px 0 0;
+    color: var(--muted);
+}

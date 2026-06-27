@@ -6,6 +6,7 @@ import Dashboard from "./pages/DashboardPage";
 import Settings from "./pages/SettingsPage";
 import CreateJob from "./pages/CreateJob";
 import Register from "./pages/Register";
+import About from "./pages/About";
 import Layout from "./components/Layout";
 import api from "./services/api";
 
@@ -68,6 +69,7 @@ export default function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="create-job" element={<CreateJob />} />
+                    <Route path="about" element={<About />} />
                 </Route>
 
             </Routes>
