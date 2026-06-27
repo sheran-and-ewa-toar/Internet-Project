@@ -1,6 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-from fastapi import HTTPException
 import requests
 import os
 import traceback
@@ -8,7 +7,7 @@ import traceback
 from feature_sets import FEATURE_SETS
 
 from models.common import (
-    load_dataset,
+    load_dataset_from_db,
     prepare_features,
     split_and_scale
 )
@@ -20,6 +19,7 @@ NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL", "http://localhost:3000")
 
 
 class TrainRequest(BaseModel):
+    jobId: int
     feature_set: str
     model: str
 
@@ -31,26 +31,35 @@ class TrainRequest(BaseModel):
 
 app = FastAPI()
 
-DATA_POS = "data/positive_dataset.csv"
-DATA_NEG = "data/negative_dataset.csv"
-
 @app.post("/train")
 def train(job: TrainRequest,background_tasks: BackgroundTasks):
     try:
         background_tasks.add_task(run_training_pipeline, job)
-        return {"status": "Processing initialized"}
+        # do it in format of success, data: {status: "Processing initialized"}, and error: null 
+        return {
+            "success": True,
+            "data": {
+                "status": "Processing initialized"
+            },
+            "error": None
+        }
     except Exception as e:
         error_details = traceback.format_exc()
         print("TRAINING FAILED:")
         print(error_details)
+        # change to return in format of success: false, data: null, and error: {message: str(e), trace: error_details}
         raise HTTPException(
             status_code=500,
             detail={
-                "message": str(e),
-                "trace": error_details
+                "success": False,
+                "data": None,
+                "error": {
+                    "message": str(e),
+                    "trace": error_details
+                }
             }
         )
-
+        
 def run_training_pipeline(job):
     try:
         df = load_dataset_from_db()
@@ -76,16 +85,29 @@ def run_training_pipeline(job):
             metrics = train_xgb(X_train, X_test, y_train, y_test)
 
         else:
-            raise Exception("Unsupported model")
+            raise Exception("Unsupported machine learning model configuration choice")
 
+        # fit fomat of payload to send to backend for updating dashboard status card to 'completed' with metrics and feature count
         payload = {
             "success": True,
             "metrics": metrics,
-            "featureCount": len(X.columns)
+            "featureCount": len(X.columns),
+            "error": None
         }
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload)
         
     except Exception as e:
+       
+        error_details = traceback.format_exc()
+        print("TRAINING PROCESS PIPELINE CRASH FAILURE:")
+        print(error_details)
+        
+        # In case of an inner breakdown, flag row status down to failed safely
+        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={
+            "status": "failed",
+            "error": str(e)
+        })
+       
         # Send failure callback to update dashboard status card to 'failed'
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={"status": "failed"})
         error_details = traceback.format_exc()
@@ -93,10 +115,14 @@ def run_training_pipeline(job):
         print("TRAINING FAILED:")
         print(error_details)
 
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": str(e),
-                "trace": error_details
-            }
-        )
+        # raise HTTPException(
+        #     status_code=500,
+        #     detail={
+        #         "success": False,
+        #         "data": None,
+        #         "error": {
+        #             "message": str(e),
+        #             "trace": error_details
+        #         }
+        #     }
+        # )

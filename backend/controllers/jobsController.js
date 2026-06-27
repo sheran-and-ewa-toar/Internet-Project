@@ -199,41 +199,54 @@ const createJob = async (req, res) => {
             pearson_enabled: !!pearsonEnabled,
             pearson_threshold: pearsonThreshold !== undefined ? parseFloat(pearsonThreshold) : 0.9
         })
-        .then(async (response) => {
-            const metrics = response.data.metrics || {};
-
-            // Update parameters using precise data calculations from ML engine response
-            await job.update({
-                status: "completed",
-                accuracy: metrics.accuracy ? parseFloat(Number(metrics.accuracy).toFixed(2)) : null,
-                precision: metrics.precision ? parseFloat(Number(metrics.precision).toFixed(2)) : null,
-                recall: metrics.recall ? parseFloat(Number(metrics.recall).toFixed(2)) : null,
-                f1Score: metrics.f1Score ? parseFloat(Number(metrics.f1Score).toFixed(2)) : null,
-                cv_mean: metrics.cv_mean ? parseFloat(Number(metrics.cv_mean).toFixed(2)) : null,
-                cv_std: metrics.cv_std ? parseFloat(Number(metrics.cv_std).toFixed(2)) : null,
-                featureCount: response.data.featureCount ?? null,
-                updateDate: new Date()
-            });
-
-            // Stream confirmation updates instantly to all logged-in client screens
-            io.emit("job_status_changed", { jobId: job.jobId, status: "completed" });
-            io.emit("job_completed", job.toJSON());
+        .then(() => {
+            // Python successfully acknowledged that it queued the background thread task
+            console.log(`[Job #${job.jobId}] Python microservice accepted tracking task registration.`);
         })
         .catch(async (err) => {
-            const errorMsg = err.response?.data?.detail?.message || err.message || "ML service failed";
-            const errorTrace = err.response?.data?.detail?.trace || null;
-
-            await job.update({
-                status: "failed",
-                error: errorMsg,
-                errorTrace: errorTrace,
-                updateDate: new Date()
-            });
-
-            // Stream failures down real-time event pipeline to update dashboard cards
+            const errorMsg = err.response?.data?.detail?.message || err.message || "ML service initialization failed";
+            await job.update({ status: "failed", error: errorMsg });
+            
+            // Alert frontend about initialization failures immediately
             io.emit("job_status_changed", { jobId: job.jobId, status: "failed" });
             io.emit("job_failed", { jobId: job.jobId, error: errorMsg });
-        });
+        })
+        
+        // .then(async (response) => {
+        //     console.log(`[Job #${job.jobId}] Python microservice accepted tracking task registration.`);
+
+        //     // Update parameters using precise data calculations from ML engine response
+        //     await job.update({
+        //         status: "completed",
+        //         accuracy: metrics.accuracy ? parseFloat(Number(metrics.accuracy).toFixed(2)) : null,
+        //         precision: metrics.precision ? parseFloat(Number(metrics.precision).toFixed(2)) : null,
+        //         recall: metrics.recall ? parseFloat(Number(metrics.recall).toFixed(2)) : null,
+        //         f1Score: metrics.f1Score ? parseFloat(Number(metrics.f1Score).toFixed(2)) : null,
+        //         cv_mean: metrics.cv_mean ? parseFloat(Number(metrics.cv_mean).toFixed(2)) : null,
+        //         cv_std: metrics.cv_std ? parseFloat(Number(metrics.cv_std).toFixed(2)) : null,
+        //         featureCount: response.data.featureCount ?? null,
+        //         updateDate: new Date()
+        //     });
+
+        //     // Stream confirmation updates instantly to all logged-in client screens
+        //     io.emit("job_status_changed", { jobId: job.jobId, status: "completed" });
+        //     io.emit("job_completed", job.toJSON());
+        // })
+        // .catch(async (err) => {
+        //     const errorMsg = err.response?.data?.detail?.message || err.message || "ML service failed";
+        //     const errorTrace = err.response?.data?.detail?.trace || null;
+
+        //     await job.update({
+        //         status: "failed",
+        //         error: errorMsg,
+        //         errorTrace: errorTrace,
+        //         updateDate: new Date()
+        //     });
+
+        //     // Stream failures down real-time event pipeline to update dashboard cards
+        //     io.emit("job_status_changed", { jobId: job.jobId, status: "failed" });
+        //     io.emit("job_failed", { jobId: job.jobId, error: errorMsg });
+        // });
 
         // Immediately respond 201 Created to the client while training processes in the background
         return res.status(201).json(

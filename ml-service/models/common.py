@@ -5,15 +5,44 @@ from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-def load_dataset(pos_path, neg_path):
-    pos_df = pd.read_csv(pos_path)
-    neg_df = pd.read_csv(neg_path)
+import os
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
-    pos_df["label"] = 1
-    neg_df["label"] = 0
+load_dotenv(dotenv_path="../backend/config/.env")
 
-    df = pd.concat([pos_df, neg_df], ignore_index=True)
 
+DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+
+# Build connection pool config for Pandas execution mapping
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=5,
+    max_overflow=2,
+    pool_recycle=3600
+)
+
+def load_dataset_from_db():
+    """
+    Queries the live MySQL EAV tables and flattens them into a unified wide DataFrame.
+    """
+    # 1. Grab target classification markers
+    query_mirna = "SELECT id, isPositive FROM MiRnaData;"
+    df_mirna = pd.read_sql(query_mirna, con=engine)
+    
+    # 2. Grab raw long-form key-value feature collections
+    query_features = "SELECT mirnaId, featureName, featureValue FROM MiRnaFeatureValue;"
+    df_features = pd.read_sql(query_features, con=engine)
+    
+    # 3. Pivot long records into machine-learning-ready wide feature columns
+    df_pivoted = df_features.pivot(index='mirnaId', columns='featureName', values='featureValue')
+    
+    # 4. Merge pivoted features onto ground truth rows
+    df = df_mirna.set_index('id').join(df_pivoted, how='inner')
+    
+    # 5. Normalize 'isPositive' to standard target tracking key 'label'
+    df = df.rename(columns={'isPositive': 'label'})
+    
     return df
 
 
