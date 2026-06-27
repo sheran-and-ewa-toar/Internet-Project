@@ -29,6 +29,10 @@ class TrainRequest(BaseModel):
     pearson_enabled: bool = False
     pearson_threshold: float = 0.9
 
+    user_id: int
+    user_role: str
+
+
 app = FastAPI()
 
 @app.post("/train")
@@ -98,10 +102,10 @@ def run_training_pipeline(job):
             "cv_std": metrics.get("cv_std"),
             "featureCount": len(X.columns)
         }
-        
+
         auth_headers = {
-        "x-user-id": "1",          # Any valid ID number string
-        "x-user-role": "admin"     # Needs to be 'admin' or 'manager' to pass the route criteria
+        "x-user-id": str(job.user_id),          # Any valid ID number string
+        "x-user-role": job.user_role     # Needs to be 'admin' or 'manager' to pass the route criteria
         }
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload, headers=auth_headers)
         

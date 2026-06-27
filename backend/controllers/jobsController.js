@@ -197,7 +197,9 @@ const createJob = async (req, res) => {
             variance_enabled: !!varianceEnabled,
             variance_threshold: varianceThreshold !== undefined ? parseFloat(varianceThreshold) : 0.01,
             pearson_enabled: !!pearsonEnabled,
-            pearson_threshold: pearsonThreshold !== undefined ? parseFloat(pearsonThreshold) : 0.9
+            pearson_threshold: pearsonThreshold !== undefined ? parseFloat(pearsonThreshold) : 0.9,
+            user_id: userId,
+            user_role: req.userRole || headers['x-user-role'] || 'user'
         })
         .then(() => {
             // Python successfully acknowledged that it queued the background thread task
@@ -255,6 +257,19 @@ const updateJobById = async (req, res) => {
         if (isNaN(jobId)) {
             return res.status(400).json(error('VALIDATION_ERROR', 'Invalid job ID'));
         }
+
+        const isSystemService = req.headers['x-api-key'] === process.env.INTERNAL_API_SECRET;
+
+        if (!isSystemService) {
+            const isOwner = job.userId === req.userId;
+            const isAdmin = req.userRole === 'admin';
+
+            if (!isOwner && !isAdmin) {
+                return res.status(403).json(
+                    error('FORBIDDEN', 'You do not have permission to modify this job record.')
+                );
+            }
+}
 
         const { status, accuracy, precision, recall, f1Score, cv_mean, cv_std } = req.body;
         const updateFields = {};

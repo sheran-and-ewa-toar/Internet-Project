@@ -14,6 +14,7 @@ const validationError = (message, details = {}) => {
     };
 };
 
+
 const validateBody = (requiredFields = []) => {
     return (req, res, next) => {
         const missingFields = requiredFields.filter((field) => {
