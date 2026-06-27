@@ -89,12 +89,21 @@ def run_training_pipeline(job):
 
         # fit fomat of payload to send to backend for updating dashboard status card to 'completed' with metrics and feature count
         payload = {
-            "success": True,
-            "metrics": metrics,
-            "featureCount": len(X.columns),
-            "error": None
+            "status": "completed",
+            "accuracy": metrics.get("accuracy"),
+            "precision": metrics.get("precision"),
+            "recall": metrics.get("recall"),
+            "f1Score": metrics.get("f1Score") or metrics.get("f1_score"), # Fallback check for snake_case
+            "cv_mean": metrics.get("cv_mean"),
+            "cv_std": metrics.get("cv_std"),
+            "featureCount": len(X.columns)
         }
-        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload)
+        
+        auth_headers = {
+        "x-user-id": "1",          # Any valid ID number string
+        "x-user-role": "admin"     # Needs to be 'admin' or 'manager' to pass the route criteria
+        }
+        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload, headers=auth_headers)
         
     except Exception as e:
        

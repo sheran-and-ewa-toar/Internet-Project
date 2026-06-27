@@ -16,7 +16,8 @@ def train_xgb(
     y_train,
     y_test
 ):
-
+    print("-> Training XGBoost model...")
+    
     scale_pos_weight = (
         len(y_train[y_train == 0]) /
         len(y_train[y_train == 1])
@@ -50,7 +51,7 @@ def train_xgb(
         cv=5,
         scoring="f1"
     )
-
+    print("-> XGBoost model training completed.")
     return {
         "accuracy": float(
             accuracy_score(

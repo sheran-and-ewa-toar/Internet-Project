@@ -14,11 +14,11 @@ const {
 } = require('../models/index');
 
 // Load Mock Metadata Seed Files
-const usersData = require('../models/users.json');
-const featureSetData = require('../models/featureSets.json');
-const featureFilterData = require('../models/featureFilters.json');
-const modelTypeData = require('../models/modelTypes.json');
-const jobData = require('../models/jobs.json'); // Direct JSON source data
+const usersData = require('users.json');
+const featureSetData = require('featureSets.json');
+const featureFilterData = require('featureFilters.json');
+const modelTypeData = require('modelTypes.json');
+const jobData = require('jobs.json'); // Direct JSON source data
 
 // Absolute paths to your raw genomics CSV datasets
 // positive it path C:\Users\shira\IdeaProjects\Internet-Project\ml-service\models

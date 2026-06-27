@@ -16,7 +16,7 @@ def train_rf(
     y_train,
     y_test
 ):
-
+    print("-> Training Random Forest model...")
     model = RandomForestClassifier(
         n_estimators=100,
         max_depth=12,
@@ -41,6 +41,7 @@ def train_rf(
         scoring="f1"
     )
 
+    print("-> Random Forest model training completed.")
     return {
         "accuracy": float(
             accuracy_score(
