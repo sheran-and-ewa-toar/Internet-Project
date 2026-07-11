@@ -25,6 +25,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.2.1",
     "mysql2": "^3.14.3",
+    "papaparse": "^5.5.4",
     "sequelize": "^6.37.8",
     "socket.io": "^4.8.3"
   },
