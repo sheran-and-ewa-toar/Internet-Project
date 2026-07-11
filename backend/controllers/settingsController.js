@@ -48,6 +48,7 @@ const updateSettings = async (req, res) => {
                 );
             }
 
+            
             updatePayload.password = normalizedPassword;
         }
 

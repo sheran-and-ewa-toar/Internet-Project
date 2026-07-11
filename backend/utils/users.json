@@ -1,0 +1,68 @@
+[
+  {
+    "userId": 1,
+    "firstName": "Ewa",
+    "lastName": "Yo",
+    "email": "ewa.yo@yoyo.com",
+    "password": "password",
+    "userRole": "admin",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-06-05T23:02:54.147Z",
+    "theme": "pink"
+  },
+  {
+    "userId": 2,
+    "firstName": "Sheran",
+    "lastName": "Smol",
+    "email": "sheran.smol@example.com",
+    "password": "password456",
+    "userRole": "user",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-05-10T12:00:00Z",
+    "theme": "teal"
+  },
+  {
+    "userId": 3,
+    "firstName": "Jeff",
+    "lastName": "Geff",
+    "email": "jeff.geff@example.com",
+    "password": "password789",
+    "userRole": "user",
+    "createDate": "2026-05-10T12:00:00Z",
+    "updateDate": "2026-05-10T12:00:00Z",
+    "theme": "dark"
+  },
+  {
+    "userId": 4,
+    "firstName": "Alice",
+    "lastName": "Smith",
+    "email": "alice.smith@example.com",
+    "password": "password012",
+    "userRole": "manager",
+    "createDate": "2026-05-30T12:30:34.906Z",
+    "updateDate": "2026-05-30T12:30:34.906Z",
+    "theme": "light"
+  },
+  {
+    "userId": 5,
+    "firstName": "tamsy",
+    "lastName": "caines",
+    "email": "angel@sphere.com",
+    "password": "cake123",
+    "userRole": "user",
+    "createDate": "2026-06-05T20:32:12.916Z",
+    "updateDate": "2026-06-05T23:12:36.278Z",
+    "theme": "pink"
+  },
+  {
+    "userId": 6,
+    "firstName": "larry",
+    "lastName": "evil",
+    "email": "larry@evil.larry",
+    "password": "evillarry",
+    "userRole": "user",
+    "createDate": "2026-06-05T22:15:58.618Z",
+    "updateDate": "2026-06-05T23:12:09.664Z",
+    "theme": "dark"
+  }
+]

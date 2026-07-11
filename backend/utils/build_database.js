@@ -14,11 +14,12 @@ const {
 } = require('../models/index');
 
 // Load Mock Metadata Seed Files
-const usersData = require('users.json');
-const featureSetData = require('featureSets.json');
-const featureFilterData = require('featureFilters.json');
-const modelTypeData = require('modelTypes.json');
-const jobData = require('jobs.json'); // Direct JSON source data
+const usersData = require(path.join(__dirname, 'users.json'));
+// const usersData = require('users.json');
+// const featureSetData = require('featureSets.json');
+// const featureFilterData = require('featureFilters.json');
+// const modelTypeData = require('modelTypes.json');
+// const jobData = require('jobs.json'); // Direct JSON source data
 
 // Absolute paths to your raw genomics CSV datasets
 // positive it path C:\Users\shira\IdeaProjects\Internet-Project\ml-service\models
@@ -111,6 +112,7 @@ const runMasterPipeline = async () => {
     try {
         console.log("🔄 Force-syncing fresh structural database schema tables...");
         await sequelize.authenticate();
+
         console.log("🔄 Link verified. Wiping and creating clean database structures...");
         await sequelize.sync({ force: true });
 
@@ -177,5 +179,30 @@ const runMasterPipeline = async () => {
         process.exit(1);
     }
 };
+
+// specific for user table creation and password hashing, run this script directly
+const runUserTablePipeline = async () => {
+    try {
+        console.log("🔄 Force-syncing fresh User database schema table...");
+        await sequelize.authenticate();
+        
+        await sequelize.query('SET FOREIGN_KEY_CHECKS = 0;');
+        console.log("🔄 Wiping and creating clean User database structures...");
+        await User.drop(); // Drops the users table if it exists
+        await User.sync();
+        console.log("🔒 Registering system user profiles (auto-hashed)...");
+        await sequelize.query('SET FOREIGN_KEY_CHECKS = 1;');
+
+        // Your individualHooks: true here ensures the beforeCreate hook fires for bulkCreate!
+        await User.bulkCreate(usersData, { validate: true, individualHooks: true });  
+        console.log(`✅ Loaded ${usersData.length} user profile contexts.`);
+        await sequelize.close();
+        process.exit(0);
+    } catch (err) {
+        console.error("❌ Fatal crash during pipeline synchronization execution:", err);
+        process.exit(1);
+    }
+}
+        
 
 runMasterPipeline();
