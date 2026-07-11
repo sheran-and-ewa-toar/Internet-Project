@@ -23,14 +23,15 @@
     background: #ef6c00;
 }
 
-.delete-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: #ff4d4f;
+td {
+    text-align: center;
+    vertical-align: middle;
 }
 
-.delete-btn:hover {
-    transform: scale(1.1);
+/* Fix the SVG sizing inside the table row */
+.delete-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor; /* Inherits the button's text color */
+    fill: none;
 }

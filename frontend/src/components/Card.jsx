@@ -70,8 +70,9 @@ export default function Card({ job, onDeleteClick }) {
             )}
 
             {status === "running" && (
-                <div className="job-running">
-                    🔄 Training model...
+                <div className="job-running" role="status" aria-live="polite">
+                    <span className="job-spinner" aria-hidden="true"></span>
+                    <span>Training model...</span>
                 </div>
             )}
 
@@ -79,7 +80,12 @@ export default function Card({ job, onDeleteClick }) {
                 className="delete-btn"
                 onClick={() => onDeleteClick(job)}
             >
-                🗑️ Delete
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+            Delete
             </button>
 
         </div>

@@ -1,12 +1,10 @@
 const Papa = require("papaparse");
+const { error, successWithFile } = require("../utils/responseHelpers");
 
 const {
     MiRnaData,
     MiRnaFeatureValue
 } = require("../models");
-
-const { success, error } =
-    require("../utils/responseHelpers");
 
 const downloadDataset = async (req, res) => {
     try {
@@ -41,22 +39,14 @@ const downloadDataset = async (req, res) => {
             return row;
         });
 
-        const csv =
-            Papa.unparse(dataset);
-
-        res.setHeader(
-            "Content-Type",
-            "text/csv"
-        );
-
-        res.setHeader(
-            "Content-Disposition",
-            "attachment; filename=mirna_dataset.csv"
-        );
-
-        return res.status(200).send(csv);
+        const csvContent = Papa.unparse(dataset);
+        return successWithFile(res, csvContent, "mirna_dataset.csv");
 
     } catch (err) {
+        
+        res.removeHeader('Content-Disposition');
+        res.setHeader('Content-Type', 'application/json');
+
         return res.status(500).json(
             error(
                 "INTERNAL_ERROR",

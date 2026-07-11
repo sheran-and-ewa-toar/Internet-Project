@@ -11,20 +11,16 @@ export default function Download() {
             setLoading(true);
 
             const response =
-                await api.get(
-                    "/api/download/dataset",
-                    {
-                        responseType: "blob"
-                    }
-                );
-
+                await api.get("/api/download/dataset");
+            
             const url =
                 window.URL.createObjectURL(
-                    new Blob([response.data])
-                );
+                    new Blob([response.data.csvData],
+                    { type: "text/csv;charset=utf-8;"
 
-            const link =
-                document.createElement("a");
+                    }));
+
+            const link = document.createElement("a");
 
             link.href = url;
             link.download = "mirna_dataset.csv";
@@ -42,7 +38,6 @@ export default function Download() {
                 "Dataset download failed:",
                 err
             );
-
             alert(
                 "Failed to download dataset."
             );

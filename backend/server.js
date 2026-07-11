@@ -13,6 +13,7 @@ const featureFiltersRoutes = require('./routes/featureFiltersRoutes');
 const authRoutes = require('./routes/authRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const downloadRoutes = require('./routes/downloadRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const { connectDatabase } = require('./models');
 const loggerMiddleware = require('./middleware/loggerMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
@@ -56,6 +57,7 @@ app.use('/api/feature-filters', featureFiltersRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/download', downloadRoutes);
+app.use('/api/ai', aiRoutes);
 const PORT = 3000;
 
 const startServer = async () => {
