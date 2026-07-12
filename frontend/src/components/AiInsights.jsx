@@ -23,24 +23,35 @@ export default function AiInsights({ job }) {
 
     return (
         <div className="ai-insights">
-            <button
-                type="button"
-                className="ai-toggle-btn"
-                onClick={handleGenerate}
-                disabled={loading || !!explanation}
-            >
-                <span className="ai-icon" aria-hidden="true">✦</span>
-                {loading ? 'Analyzing metrics via AI...' : explanation ? 'AI Analysis Ready' : ''}
-            </button>
+            {!explanation && (
+                <button
+                    type="button"
+                    className="ai-toggle-btn"
+                    onClick={handleGenerate}
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <span className="ai-icon ai-icon-loading" aria-hidden="true">✦</span>
+                    ) : (
+                        <span className="ai-icon" aria-hidden="true">✦</span>
+                    )}
+                    {loading ? 'Analyzing metrics via AI...' : 'Generate AI Performance Analysis'}
+                </button>
+            )}
 
             {loading && (
                 <div className="ai-loading">Analyzing metrics via AI...</div>
             )}
 
             {!loading && explanation && (
-                <div className="ai-result">
-                    <h4>AI Engine Analysis</h4>
-                    <p>{explanation}</p>
+                <div className="ai-hover-wrapper">
+                    <div className="ai-hover-trigger">
+                        <span className="ai-icon" aria-hidden="true">✦</span>
+                        AI Engine Analysis
+                    </div>
+                    <div className="ai-result">
+                        <p>{explanation}</p>
+                    </div>
                 </div>
             )}
         </div>
