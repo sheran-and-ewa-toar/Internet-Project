@@ -19,7 +19,6 @@ const MODEL_MAP = {
     2: "XGB"
 };
 
-// 1. GET ALL JOBS (With strict role-based visibility filters)
 const getAllJobs = async (req, res) => {
     try {
         const role = req.userRole;
@@ -66,7 +65,6 @@ const getAllJobs = async (req, res) => {
     }
 };
 
-// 2. GET JOB BY ID (With safety ownership verification)
 const getJobById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
@@ -135,20 +133,46 @@ const createJob = async (req, res) => {
         
         // check for required fields
         if (!featureSetId || !modelTypeId) {
-            return res.status(400).json(error('VALIDATION_ERROR', 'Missing required fields: featureSetId and modelTypeId are mandatory.'));
+            return res.status(400).json(error('VALIDATION_ERROR', 'Missing required fields: Feature Set and Model Type are mandatory.'));
         }
 
         if (pearsonEnabled) {
             const parsedPearson = parseFloat(pearsonThreshold);
-            if (pearsonThreshold === undefined || pearsonThreshold === null || pearsonThreshold === "" || isNaN(parsedPearson)) {
-                return res.status(400).json(error('VALIDATION_ERROR', 'A valid numerical Pearson threshold must be provided when Pearson filter is enabled.'));
+
+            if (
+                pearsonThreshold === undefined ||
+                pearsonThreshold === null ||
+                pearsonThreshold === "" ||
+                isNaN(parsedPearson) ||
+                parsedPearson < 0 ||
+                parsedPearson > 1
+            ) {
+                return res.status(400).json(
+                    error(
+                        'VALIDATION_ERROR',
+                        'Pearson threshold must be a number between 0 and 1 when Pearson filter is enabled.'
+                    )
+                );
             }
         }
 
         if (varianceEnabled) {
             const parsedVariance = parseFloat(varianceThreshold);
-            if (varianceThreshold === undefined || varianceThreshold === null || varianceThreshold === "" || isNaN(parsedVariance)) {
-                return res.status(400).json(error('VALIDATION_ERROR', 'A valid numerical Variance threshold must be provided when Variance filter is enabled.'));
+
+            if (
+                varianceThreshold === undefined ||
+                varianceThreshold === null ||
+                varianceThreshold === "" ||
+                isNaN(parsedVariance) ||
+                parsedVariance < 0 ||
+                parsedVariance > 1
+            ) {
+                return res.status(400).json(
+                    error(
+                        'VALIDATION_ERROR',
+                        'Variance threshold must be a number between 0 and 1 when Variance filter is enabled.'
+                    )
+                );
             }
         }
 
@@ -244,7 +268,6 @@ const createJob = async (req, res) => {
     }
 };
 
-// 4. UPDATE JOB BY ID
 const updateJobById = async (req, res) => {
     try {
         const jobId = parseInt(req.params.id);
@@ -298,7 +321,6 @@ const updateJobById = async (req, res) => {
     }
 };
 
-// 5. DELETE JOB BY ID (Restricted view access layer managed by admin roles in routes)
 const deleteJobById = async (req, res) => {
 try {
     const jobId = parseInt(req.params.id);
