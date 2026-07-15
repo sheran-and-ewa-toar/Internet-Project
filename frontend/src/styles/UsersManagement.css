@@ -1,0 +1,55 @@
+.users-page {
+    min-height:70vh;
+    display:flex;
+    justify-content:center;
+    padding:40px 20px;
+}
+
+.users-card {
+    width:100%;
+    max-width:900px;
+    background:var(--surface);
+    border-radius:16px;
+    padding:30px;
+    border:1px solid var(--border);
+    box-shadow:var(--card-shadow);
+}
+
+.users-card h2 {
+    margin-top:0;
+    color:var(--primary);
+}
+
+.users-card p {
+    color:var(--muted);
+}
+
+table {
+    width:100%;
+    margin-top:25px;
+    border-collapse:collapse;
+}
+
+th {
+    text-align:left;
+    padding:12px;
+    border-bottom:1px solid var(--border);
+}
+
+td {
+    padding:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.delete-user-btn {
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.delete-user-btn:hover {
+    background:#b91c1c;
+}

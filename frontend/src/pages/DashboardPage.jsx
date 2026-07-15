@@ -5,12 +5,13 @@ import socket from "../services/socket";
 import Card from "../components/Card";
 import DataTable from "../components/DataTable";
 import ConfirmModal from "../components/ConfirmModal";
+import Toast from "../components/Toast";
 
 export default function Dashboard() {
     const [jobs, setJobs] = useState([]);
     const [featureSets, setFeatureSets] = useState([]);
     const [modelTypes, setModelTypes] = useState([]);
-
+    const [toast, setToast] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -52,6 +53,13 @@ export default function Dashboard() {
         const safeJobs = jobsRes.data?.data ?? jobsRes.data ?? [];
 
         setJobs(Array.isArray(safeJobs) ? safeJobs : []);
+    };
+
+    const showToast = (message, type = "success") => {
+        setToast({
+            message,
+            type
+        });
     };
 
     useEffect(() => {
@@ -103,8 +111,16 @@ export default function Dashboard() {
             setJobs(prev =>
                 prev.filter(j => j.jobId !== jobToDelete.jobId)
             );
+
+            showToast(
+                "Job deleted successfully.",
+                "success"
+            );
         } catch (err) {
-            console.error("Delete failed", err);
+            showToast(
+                "Failed to delete job.",
+                "error"
+            );
         } finally {
             setJobToDelete(null);
         }
@@ -211,7 +227,13 @@ export default function Dashboard() {
                 onConfirm={handleDelete}
                 onCancel={() => setJobToDelete(null)}
             />
-
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 }

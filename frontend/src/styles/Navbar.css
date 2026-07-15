@@ -21,6 +21,7 @@
 
 .navbar-center {
     display: flex;
+    align-items: center;
     gap: 18px;
 }
 
@@ -29,6 +30,10 @@
     color: var(--text);
     font-weight: 500;
     transition: color 0.2s ease;
+
+    display: flex;
+    align-items: center;
+    height: 36px;
 }
 
 .navbar-center a:hover {
@@ -57,4 +62,24 @@
 
 .navbar-right button:hover {
     background: var(--button-hover);
+}
+
+.new-job-link {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-foreground) !important;
+    font-weight: 700;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    height: 36px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.new-job-link:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
 }

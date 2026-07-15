@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import About from "./pages/About";
 import Layout from "./components/Layout";
 import api from "./services/api";
+import UsersManagement from "./pages/UsersManagement";
 
 const themeOptions = ["light", "dark", "pink", "teal"];
 
@@ -72,6 +73,7 @@ export default function App() {
                     <Route path="create-job" element={<CreateJob />} />
                     <Route path="about" element={<About />} />
                     <Route path="download" element={<Download />} />
+                    <Route path="users" element={<UsersManagement />} />
                 </Route>
 
             </Routes>

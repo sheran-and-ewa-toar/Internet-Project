@@ -65,7 +65,7 @@ export default function Card({ job, onDeleteClick }) {
             {status === "failed" && (
                 <div className="job-error">
                     <strong>Job failed:</strong>
-                    <div>{job.error || "Unknown error"}</div>
+                    <div>{job.error || "ML-Service failed"}</div>
                 </div>
             )}
 

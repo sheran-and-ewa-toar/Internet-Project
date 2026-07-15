@@ -18,7 +18,12 @@ const {
     deleteUser
 } = require('../controllers/usersController');
 
-router.get('/', getAllUsers);
+router.get(
+    '/',
+    authMiddleware.isAuthenticated,
+    authMiddleware.authorizeRoles(['admin']),
+    getAllUsers
+);
 
 router.get(
     '/me',
@@ -57,7 +62,6 @@ router.delete(
     '/:id',
     validateParams(['id']),
     authMiddleware.isAuthenticated,
-    authMiddleware.authorizeRoles(['admin']),
     deleteUser
 );
 

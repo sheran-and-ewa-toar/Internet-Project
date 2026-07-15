@@ -59,10 +59,15 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
 
             <div className="navbar-center">
                 <Link to="/dashboard">Dashboard</Link>
-                <Link to="/settings">Settings</Link>
-                <Link to="/create-job">New Job</Link>
                 <Link to="/about">About</Link>
+                <Link to="/create-job" className="new-job-link">
+                    New Job
+                </Link>
                 <Link to="/download">Download</Link>
+                <Link to="/settings">Settings</Link>
+                {user?.userRole === "admin" && (
+                    <Link to="/users">Users</Link>
+                )}
             </div>
 
             <div className="navbar-right">

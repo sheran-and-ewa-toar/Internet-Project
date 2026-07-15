@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "../services/api";
 import "../styles/Settings.css";
+import ConfirmModal from "../components/ConfirmModal";
+import { useNavigate } from "react-router-dom";
 
 const themeOptions = [
     { value: "light", label: "Default (Light)" },
@@ -23,6 +25,8 @@ export default function Settings() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const navigate = useNavigate();
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -135,6 +139,36 @@ export default function Settings() {
         }
     };
 
+    const handleDeleteAccount =
+        async () => {
+
+        try {
+
+            const me =
+                await api.get(
+                    "/api/users/me"
+                );
+
+            const user =
+                me.data?.data;
+
+            await api.delete(
+                `/api/users/${user.userId}`
+            );
+
+            localStorage.clear();
+
+            setUser?.(null);
+
+            navigate("/login");
+
+        } catch (err) {
+            setError(
+                "Failed to delete account."
+            );
+        }
+    };    
+
     if (loading) {
         return <div className="settings-page">Loading...</div>;
     }
@@ -198,6 +232,47 @@ export default function Settings() {
 
                 </form>
             </div>
+            <div className="danger-zone">
+
+                <h3>
+                    Danger Zone
+                </h3>
+
+                <p>
+                    Deleting your account is
+                    permanent.
+
+                    All training jobs
+                    associated with this account
+                    will also be removed.
+                </p>
+
+                <button
+                    className="danger-btn"
+                    onClick={() =>
+                        setDeleteModalOpen(true)
+                    }
+                >
+                    Delete My Account
+                </button>
+
+            </div>
+
+            <ConfirmModal
+                isOpen={deleteModalOpen}
+                title="Delete Account"
+                message="
+                    Are you sure you want
+                    to permanently delete
+                    your account and all jobs?
+                "
+                onConfirm={
+                    handleDeleteAccount
+                }
+                onCancel={() =>
+                    setDeleteModalOpen(false)
+                }
+            />            
         </div>
     );
 }

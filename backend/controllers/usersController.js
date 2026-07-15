@@ -1,8 +1,7 @@
 const { success, error } = require('../utils/responseHelpers');
-const { User } = require('../models'); // Centralized ORM models configuration interface
+const { User, Job, JobFilter, sequelize } = require('../models'); // Centralized ORM models configuration interface
 const { Op } = require('sequelize');   // For query operations like case-insensitive filters
 
-// 1. GET ALL USERS
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
@@ -12,7 +11,6 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-// 2. GET CURRENT LOGGED-IN USER PROFILE Context
 const getCurrentUser = async (req, res) => {
     try {
         const userId = req.userId;
@@ -28,7 +26,6 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
-// 3. GET SPECIFIC USER BY PK ID
 const getUserById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
@@ -44,7 +41,6 @@ const getUserById = async (req, res) => {
     }
 };
 
-// 4. CREATE NEW USER (With uniqueness verification checks)
 const createUser = async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
@@ -88,7 +84,6 @@ const createUser = async (req, res) => {
     }
 };
 
-// 5. UPDATE EXISTING USER (With multi-role permission logic gatekeeping)
 const updateUser = async (req, res) => {
     try {
         const id = parseInt(req.params.id); // Maps to target user parameter id
@@ -163,24 +158,103 @@ const updateUser = async (req, res) => {
     }
 };
 
-// 6. DELETE USER BY ID
 const deleteUser = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deletedCount = await User.destroy({ where: { userId: id } });
 
-        if (!deletedCount) {
-            return res.status(404).json(error('NOT_FOUND', 'User record not found.'));
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json(
+                error(
+                    "NOT_FOUND",
+                    "User record not found."
+                )
+            );
         }
+
+        const isSelf =
+            req.userId === id;
+
+        const isAdmin =
+            req.userRole === "admin";
+
+        if (!isSelf && !isAdmin) {
+            return res.status(403).json(
+                error(
+                    "FORBIDDEN",
+                    "You do not have permission to delete this account."
+                )
+            );
+        }
+
+        if (isAdmin && isSelf) {
+            return res.status(400).json(
+                error(
+                    "INVALID_ACTION",
+                    "Admins cannot delete their own account from administration panel."
+                )
+            );
+        }        
+
+        await sequelize.transaction(
+            async (t) => {
+
+                const jobs =
+                    await Job.findAll({
+                        where: {
+                            userId: id
+                        },
+                        attributes: ["jobId"],
+                        transaction: t
+                    });
+
+                const jobIds =
+                    jobs.map(
+                        j => j.jobId
+                    );
+
+                if (jobIds.length > 0) {
+
+                    await JobFilter.destroy({
+                        where: {
+                            jobId: jobIds
+                        },
+                        transaction: t
+                    });
+
+                    await Job.destroy({
+                        where: {
+                            userId: id
+                        },
+                        transaction: t
+                    });
+                }
+
+                await User.destroy({
+                    where: {
+                        userId: id
+                    },
+                    transaction: t
+                });
+            }
+        );
 
         return res.status(200).json(
             success({
-                message: 'User deleted successfully',
+                message:
+                    "User deleted successfully",
                 userId: id
             })
         );
+
     } catch (err) {
-        return res.status(500).json(error('INTERNAL_ERROR', 'Delete execution failure: ' + err.message));
+        return res.status(500).json(
+            error(
+                "INTERNAL_ERROR",
+                err.message
+            )
+        );
     }
 };
 
