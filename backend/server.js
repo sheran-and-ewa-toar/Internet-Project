@@ -21,7 +21,7 @@ const authMiddleware = require('./middleware/authMiddleware');
 app.use(express.json());
 
 const corsOptions = {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 
@@ -58,7 +58,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/download', downloadRoutes);
 app.use('/api/ai', aiRoutes);
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
     try {

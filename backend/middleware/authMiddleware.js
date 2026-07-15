@@ -39,7 +39,7 @@ const authorizeRoles = (allowedRoles = []) => {
     };
 };
 
-// ensures a user is "logged in" by presence of `x-user-id` header.
+// ensures a user is "logged in" by presence of x-user-id header.
 const isAuthenticated = (req, res, next) => {
     const userId = req.userId || req.header('x-user-id');
     if (!userId) {

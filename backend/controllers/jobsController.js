@@ -120,7 +120,7 @@ const getJobById = async (req, res) => {
 const createJob = async (req, res) => {
     try {
         const userId = req.userId;
-        const io = req.app.get("io"); // Socket.IO reference instance
+        const io = req.app.get("io");
 
         const {
             featureSetId,
@@ -131,7 +131,6 @@ const createJob = async (req, res) => {
             varianceThreshold
         } = req.body;
         
-        // check for required fields
         if (!featureSetId || !modelTypeId) {
             return res.status(400).json(error('VALIDATION_ERROR', 'Missing required fields: Feature Set and Model Type are mandatory.'));
         }
@@ -176,7 +175,6 @@ const createJob = async (req, res) => {
             }
         }
 
-        // Persist the initial queued job row securely to MySQL
         const job = await Job.create({
             userId,
             featureSetId: parseInt(featureSetId),
@@ -190,14 +188,14 @@ const createJob = async (req, res) => {
         if (!!pearsonEnabled && pearsonThreshold !== undefined && pearsonThreshold !== null) {
             bridgeFiltersToCreate.push({
                 jobId: job.jobId,
-                filterId: 1, // Primary key identifier for Pearson Correlation in FeatureFilter lookup
+                filterId: 1,
                 thresholdValue: parseFloat(pearsonThreshold)
             });
         }
         if (!!varianceEnabled && varianceThreshold !== undefined && varianceThreshold !== null) {
             bridgeFiltersToCreate.push({
                 jobId: job.jobId,
-                filterId: 2, // Primary key identifier for Variance Threshold in FeatureFilter lookup
+                filterId: 2,
                 thresholdValue: parseFloat(varianceThreshold)
             });
         }
@@ -213,7 +211,7 @@ const createJob = async (req, res) => {
         await job.update({ status: "running", updateDate: new Date() });
         io.emit("job_status_changed", { jobId: job.jobId, status: "running" });
 
-        // Fire and forget: send asynchronous transaction payload to microRNA training backend
+        // send asynchronous transaction payload to microRNA training backend
         axios.post(`${FASTAPI_URL}/train`, {
             jobId: job.jobId,
             feature_set: job.featureSetName,
@@ -226,14 +224,12 @@ const createJob = async (req, res) => {
             user_role: req.userRole || headers['x-user-role'] || 'user'
         })
         .then(() => {
-            // Python successfully acknowledged that it queued the background thread task
             console.log(`[Job #${job.jobId}] Python microservice accepted tracking task registration.`);
         })
         .catch(async (err) => {
             const errorMsg = err.response?.data?.detail?.message || err.message || "ML service initialization failed";
             await job.update({ status: "failed", error: errorMsg });
             
-            // Alert frontend about initialization failures immediately
             io.emit("job_status_changed", { jobId: job.jobId, status: "failed" });
             io.emit("job_failed", { jobId: job.jobId, error: errorMsg });
         })
@@ -249,12 +245,10 @@ const createJob = async (req, res) => {
                 updateDate: new Date()
             });
 
-            // Stream failures down real-time event pipeline to update dashboard cards
             io.emit("job_status_changed", { jobId: job.jobId, status: "failed" });
             io.emit("job_failed", { jobId: job.jobId, error: errorMsg });
         });
 
-        // Immediately respond 201 Created to the client while training processes in the background
         return res.status(201).json(
             success({
                 message: "Job created successfully and processing in background.",

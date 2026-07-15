@@ -141,7 +141,6 @@
     color: var(--primary);
 }
 
-/* The SVG changes seamlessly with the text color */
 .delete-btn svg {
     width: 14px;
     height: 14px;
@@ -152,19 +151,3 @@
 .delete-btn:hover svg {
     transform: rotate(-15deg);
 }
-
-/* .delete-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 10px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.delete-btn:hover {
-    background: var(--surface-alt);
-    border-color: var(--primary);
-    color: var(--primary);
-} */
-

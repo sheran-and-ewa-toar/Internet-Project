@@ -1,7 +1,6 @@
 const { success, error } = require('../utils/responseHelpers');
-const { ModelType } = require('../models'); // Centralized ORM models registry
+const { ModelType } = require('../models');
 
-// 1. GET ALL MODEL TYPES FROM DB
 const getAllModelTypes = async (req, res) => {
     try {
         const modelTypes = await ModelType.findAll();
@@ -13,7 +12,6 @@ const getAllModelTypes = async (req, res) => {
     }
 };
 
-// 2. GET SPECIFIC MODEL TYPE BY ID FROM DB
 const getModelTypeById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);

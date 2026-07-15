@@ -28,10 +28,9 @@ td {
     vertical-align: middle;
 }
 
-/* Fix the SVG sizing inside the table row */
 .delete-btn svg {
     width: 16px;
     height: 16px;
-    stroke: currentColor; /* Inherits the button's text color */
+    stroke: currentColor;
     fill: none;
 }

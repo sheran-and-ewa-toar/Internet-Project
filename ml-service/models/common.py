@@ -26,25 +26,19 @@ def load_dataset_from_db():
     """
     Queries the live MySQL EAV tables and flattens them into a unified wide DataFrame.
     """
-    # 1. Grab target classification markers
     query_mirna = "SELECT id, isPositive FROM MiRnaData;"
     df_mirna = pd.read_sql(query_mirna, con=engine)
     
-    # 2. Grab raw long-form key-value feature collections
     query_features = "SELECT mirnaId, featureName, featureValue FROM MiRnaFeatureValue;"
     df_features = pd.read_sql(query_features, con=engine)
     
-    # 3. Pivot long records into machine-learning-ready wide feature columns
     df_pivoted = df_features.pivot(index='mirnaId', columns='featureName', values='featureValue')
     
     if 'label' in df_pivoted.columns:
         df_pivoted = df_pivoted.drop(columns=['label'])
 
-    
-    # 4. Merge pivoted features onto ground truth rows
     df = df_mirna.set_index('id').join(df_pivoted, how='inner')
  
-    # 5. Normalize 'isPositive' to standard target tracking key 'label'
     df = df.rename(columns={'isPositive': 'label'})
     return df
 

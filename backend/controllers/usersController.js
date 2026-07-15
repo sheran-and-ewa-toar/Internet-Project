@@ -1,6 +1,6 @@
 const { success, error } = require('../utils/responseHelpers');
-const { User, Job, JobFilter, sequelize } = require('../models'); // Centralized ORM models configuration interface
-const { Op } = require('sequelize');   // For query operations like case-insensitive filters
+const { User, Job, JobFilter, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 const getAllUsers = async (req, res) => {
     try {
@@ -50,7 +50,6 @@ const createUser = async (req, res) => {
             return res.status(400).json(error('VALIDATION_ERROR', 'Password must be at least 6 characters.'));
         }
 
-        // Perform case-insensitive uniqueness scan on the Email column
         const existingUser = await User.findOne({
             where: {
                 email: { [Op.like]: email.trim().toLowerCase() }
@@ -61,7 +60,6 @@ const createUser = async (req, res) => {
             return res.status(409).json(error("USER_EXISTS", "Email already registered."));
         }
 
-        // Build and insert row (Primary Key autoIncrement maps automatically)
         const newUser = await User.create({
             firstName,
             lastName,
@@ -86,7 +84,7 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const id = parseInt(req.params.id); // Maps to target user parameter id
+        const id = parseInt(req.params.id);
         const user = await User.findByPk(id);
 
         if (!user) {
@@ -116,7 +114,6 @@ const updateUser = async (req, res) => {
         const validThemes = ['light', 'dark', 'pink', 'teal'];
         const normalizedPassword = password === undefined ? undefined : String(password);
 
-        // Input data constraint boundaries evaluations
         if (email !== undefined && !emailRegex.test(email)) {
             return res.status(400).json(error('VALIDATION_ERROR', 'Invalid email format.'));
         }
@@ -129,7 +126,6 @@ const updateUser = async (req, res) => {
             return res.status(400).json(error('VALIDATION_ERROR', 'Invalid theme chosen.'));
         }
 
-        // Construct properties update payload map dynamically
         const updateFields = {};
         if (firstName !== undefined) updateFields.firstName = firstName;
         if (lastName !== undefined) updateFields.lastName = lastName;
@@ -137,14 +133,12 @@ const updateUser = async (req, res) => {
         if (normalizedPassword?.trim()) updateFields.password = normalizedPassword;
         if (theme !== undefined) updateFields.theme = theme;
 
-        // Elevated clearance role assignment authorization rule checks
         if ((isAdmin || isManager) && userRole !== undefined) {
             updateFields.userRole = userRole;
         }
 
         updateFields.updateDate = new Date();
 
-        // Update target data properties persistently on MySQL
         await user.update(updateFields);
 
         return res.status(200).json(

@@ -39,7 +39,6 @@ app = FastAPI()
 def train(job: TrainRequest,background_tasks: BackgroundTasks):
     try:
         background_tasks.add_task(run_training_pipeline, job)
-        # do it in format of success, data: {status: "Processing initialized"}, and error: null 
         return {
             "success": True,
             "data": {
@@ -51,7 +50,6 @@ def train(job: TrainRequest,background_tasks: BackgroundTasks):
         error_details = traceback.format_exc()
         print("TRAINING FAILED:")
         print(error_details)
-        # change to return in format of success: false, data: null, and error: {message: str(e), trace: error_details}
         raise HTTPException(
             status_code=500,
             detail={
@@ -67,8 +65,6 @@ def train(job: TrainRequest,background_tasks: BackgroundTasks):
 def run_training_pipeline(job):
     try:
         df = load_dataset_from_db()
-        # df = load_dataset(DATA_POS, DATA_NEG)
-        
         features = FEATURE_SETS[job.feature_set]
 
         X, y = prepare_features(
@@ -91,7 +87,6 @@ def run_training_pipeline(job):
         else:
             raise Exception("Unsupported machine learning model configuration choice")
 
-        # fit fomat of payload to send to backend for updating dashboard status card to 'completed' with metrics and feature count
         payload = {
             "status": "completed",
             "accuracy": metrics.get("accuracy"),
@@ -104,8 +99,8 @@ def run_training_pipeline(job):
         }
 
         auth_headers = {
-        "x-user-id": str(job.user_id),          # Any valid ID number string
-        "x-user-role": job.user_role     # Needs to be 'admin' or 'manager' to pass the route criteria
+        "x-user-id": str(job.user_id),
+        "x-user-role": job.user_role
         }
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload, headers=auth_headers)
         
@@ -115,27 +110,13 @@ def run_training_pipeline(job):
         print("TRAINING PROCESS PIPELINE CRASH FAILURE:")
         print(error_details)
         
-        # In case of an inner breakdown, flag row status down to failed safely
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={
             "status": "failed",
             "error": str(e)
         })
        
-        # Send failure callback to update dashboard status card to 'failed'
         requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={"status": "failed"})
         error_details = traceback.format_exc()
 
         print("TRAINING FAILED:")
         print(error_details)
-
-        # raise HTTPException(
-        #     status_code=500,
-        #     detail={
-        #         "success": False,
-        #         "data": None,
-        #         "error": {
-        #             "message": str(e),
-        #             "trace": error_details
-        #         }
-        #     }
-        # )

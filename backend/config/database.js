@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 const path = require('path');
 const { Sequelize } = require('sequelize');
 
-// Dynamically target the .env file 
 dotenv.config({ path: path.join(__dirname, './.env') });
 
 const sequelize = new Sequelize(

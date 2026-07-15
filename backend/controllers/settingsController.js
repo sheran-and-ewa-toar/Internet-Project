@@ -11,7 +11,7 @@ const getSettings = async (req, res) => {
             return res.status(404).json(error('NOT_FOUND', 'User not found'));
         }
 
-        return res.status(200).json(success(user)); //only mail and theme
+        return res.status(200).json(success(user));
     } catch (err) {
         return res.status(500).json(error('INTERNAL_ERROR', 'Failed to fetch settings'));
     }

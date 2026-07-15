@@ -9,6 +9,7 @@ Users can:
 * Create training jobs
 * Select feature sets and machine learning models
 * View experiment results and evaluation metrics
+* Download the full dataset used for training
 * Manage personal settings and theme preferences
 
 The system consists of:
@@ -87,50 +88,102 @@ http://localhost:8000
 
 ---
 
-## AI Features
+## Database Setup
 
-The platform integrates a machine learning microservice that trains classification models on miRNA feature datasets.
+The backend uses **MySQL** as the database engine and **Sequelize v6** as the ORM.
 
-Supported models:
+The database connection configuration is located in:
 
-* Random Forest
-* XGBoost
+`backend/config/database.js`
 
-Supported feature sets:
 
-* 1D features
-* 2D features
-* 3D features
-* 1D + 2D features
-* 1D + 3D features
-* 2D + 3D features
-* Combined feature sets
+The connection is configured using environment variables.
 
-Returned metrics include:
+Example:
 
-* Accuracy
-* Precision
-* Recall
-* F1 Score
-* Cross-validation Mean
-* Cross-validation Standard Deviation
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=mirna_classifier_db
+DB_PORT=3306
+```
 
 ---
 
-## WebSocket Features
+## Environment Variables
 
-The application uses Socket.IO for real-time dashboard updates.
+The backend requires a `.env` file located in the backend directory.
 
-Custom events:
+Example:
 
-* `job_created`
-* `job_started`
-* `job_completed`
-* `job_failed`
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=password
+DB_NAME=mirna_classifier_db
+DB_PORT=3306
 
-When a training job changes status, all connected browser clients receive updates immediately without refreshing the page.
+PORT=3000
 
-This feature is demonstrated by opening multiple browser tabs and observing synchronized dashboard updates.
+FASTAPI_SERVICE_URL=http://localhost:8000
+NODE_BACKEND_URL=http://localhost:3000
+
+INTERNAL_API_SECRET=
+GEMINI_API_KEY=
+```
+
+The frontend requires a `.env` file located in the frontend directory.
+
+Example:
+
+```env
+PORT=5173
+BACKEND_URL=http://localhost:3000
+```
+
+
+---
+
+## ORM Setup
+
+The backend uses Sequelize v6 as the ORM.
+
+Models are located in:
+
+`backend/models/`
+
+### Main models:
+
+* User
+* Job
+* FeatureSet
+* FeatureFilter
+* JobFilter
+* ModelType
+* MiRnaData
+* MiRnaFeatureValue
+
+### Database relationships:
+
+User → Jobs
+One user can create multiple jobs.
+
+Jobs → Feature Filters
+
+Many-to-many relationship:
+
+Job
+ |
+ |
+JobFilter
+ |
+ |
+FeatureFilter
+
+Sequelize associations are configured in:
+
+`backend/models/index.js`
 
 ---
 
@@ -164,11 +217,71 @@ This feature is demonstrated by opening multiple browser tabs and observing sync
 * PUT `/api/jobs/:id`
 * DELETE `/api/jobs/:id`
 
+### AI Analysis
+
+* GET `/api/explain-job`
+
+### Download
+
+* GET `/api/dataset`
+
 ### Metadata
 
 * GET `/api/model-types`
+* GET `/api/model-types/:id`
 * GET `/api/feature-sets`
+* GET `/api/feature-sets/:id`
 * GET `/api/feature-filters`
+* GET `/api/feature-filters/:id`
+
+---
+
+## WebSocket Features
+
+The application uses Socket.IO for real-time dashboard updates.
+
+Custom events:
+
+* `job_created`
+* `job_started`
+* `job_completed`
+* `job_failed`
+
+When a training job changes status, all connected browser clients receive updates immediately without refreshing the page.
+
+This feature is demonstrated by opening multiple browser tabs and observing synchronized dashboard updates.
+
+---
+
+## AI Features
+
+The platform integrates a machine learning microservice that trains classification models on miRNA feature datasets.
+
+Supported models:
+
+* Random Forest
+* XGBoost
+
+Supported feature sets:
+
+* 1D features
+* 2D features
+* 3D features
+* 1D + 2D features
+* 1D + 3D features
+* 2D + 3D features
+* Combined feature sets
+
+Returned metrics include:
+
+* Accuracy
+* Precision
+* Recall
+* F1 Score
+* Cross-validation Mean
+* Cross-validation Standard Deviation
+
+In addition, there's an option to generate for each training job an AI performance analysis.
 
 ---
 
