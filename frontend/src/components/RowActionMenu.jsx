@@ -109,7 +109,6 @@ export default function RowActionMenu({ job, onDeleteClick }) {
                         type="button"
                         disabled={loading || job.status !== "completed"}
                         onClick={handleGenerateAI}
-                        disabled={loading}
                     >   
                         <span className="row-action-icon" aria-hidden="true">✦</span>
                         {loading ? 'Generating AI...' : 'Generate AI'}
