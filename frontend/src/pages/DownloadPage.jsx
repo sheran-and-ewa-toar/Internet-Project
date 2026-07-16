@@ -13,17 +13,23 @@ export default function Download() {
             const response =
                 await api.get("/api/download/dataset");
             
+            const csvData = response.data.data.csvData;
+            const fileName = response.data.data.fileName;
+
             const url =
                 window.URL.createObjectURL(
-                    new Blob([response.data.csvData],
-                    { type: "text/csv;charset=utf-8;"
-
-                    }));
+                    new Blob(
+                        [csvData],
+                        { 
+                            type: "text/csv;charset=utf-8;"
+                        }
+                    )
+                );
 
             const link = document.createElement("a");
 
             link.href = url;
-            link.download = "mirna_dataset.csv";
+            link.download = fileName;
 
             document.body.appendChild(link);
 
