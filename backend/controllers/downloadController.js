@@ -1,29 +1,16 @@
 const Papa = require("papaparse");
-
-const { error } = require("../utils/responseHelpers");
+const { error, successWithFile } = require("../utils/responseHelpers");
 
 const {
     MiRnaData,
     MiRnaFeatureValue
 } = require("../models");
 
-
 const downloadDataset = async (req, res) => {
     try {
         const sampleSize = Math.min(
             parseInt(req.query.limit) || 100,
             1000
-        );
-
-
-        res.setHeader(
-            "Content-Disposition",
-            "attachment; filename=mirna_sample_dataset.csv"
-        );
-
-        res.setHeader(
-            "Content-Type",
-            "text/csv"
         );
 
         const mirnas = await MiRnaData.findAll({
@@ -51,18 +38,36 @@ const downloadDataset = async (req, res) => {
                 isPositive: mirna.isPositive
             };
 
-            mirna.features.forEach(feature => {
+            if (mirna.features) {
 
-                row[feature.featureName] =
-                    feature.featureValue;
+                mirna.features.forEach(feature => {
 
-            });
+                    row[feature.featureName] =
+                        feature.featureValue;
+
+                });
+
+            }
 
             return row;
         });
 
+        if (dataset.length === 0) {
+            return res.status(404).json(
+                error(
+                    "NOT_FOUND",
+                    "No dataset records found."
+                )
+            );
+        }
+
         const csvContent = Papa.unparse(dataset);
-        return res.send(csvContent);
+
+        return successWithFile(
+            res,
+            csvContent,
+            "mirna_sample_dataset.csv"
+        );
 
     } catch (err) {
         console.error(
@@ -70,16 +75,12 @@ const downloadDataset = async (req, res) => {
             err
         );
 
-        if (!res.headersSent) {
-
-            return res.status(500).json(
-                error(
-                    "INTERNAL_ERROR",
-                    err.message
-                )
-            );
-
-        }
+        return res.status(500).json(
+            error(
+                "INTERNAL_ERROR",
+                err.message
+            )
+        );
     }
 };
 
