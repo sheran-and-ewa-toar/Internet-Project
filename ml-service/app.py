@@ -15,7 +15,7 @@ from models.common import (
 from models.rf import train_rf
 from models.xgb import train_xgb
 
-NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL")
+REACT_APP_BACKEND_URL = os.getenv("REACT_APP_BACKEND_URL")
 
 
 class TrainRequest(BaseModel):
@@ -102,7 +102,7 @@ def run_training_pipeline(job):
         "x-user-id": str(job.user_id),
         "x-user-role": job.user_role
         }
-        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json=payload, headers=auth_headers)
+        requests.put(f"{REACT_APP_BACKEND_URL}/api/jobs/{job.jobId}", json=payload, headers=auth_headers)
         
     except Exception as e:
        
@@ -110,12 +110,12 @@ def run_training_pipeline(job):
         print("TRAINING PROCESS PIPELINE CRASH FAILURE:")
         print(error_details)
         
-        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={
+        requests.put(f"{REACT_APP_BACKEND_URL}/api/jobs/{job.jobId}", json={
             "status": "failed",
             "error": str(e)
         })
        
-        requests.put(f"{NODE_BACKEND_URL}/api/jobs/{job.jobId}", json={"status": "failed"})
+        requests.put(f"{REACT_APP_BACKEND_URL}/api/jobs/{job.jobId}", json={"status": "failed"})
         error_details = traceback.format_exc()
 
         print("TRAINING FAILED:")
