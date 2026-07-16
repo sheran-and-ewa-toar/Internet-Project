@@ -53,11 +53,11 @@ export default function Download() {
 
             <div className="download-header">
                 <h1>
-                    📥 Download Dataset
+                    📥 Download Sample Dataset
                 </h1>
 
                 <p>
-                    Download the complete dataset used
+                    Download a sample dataset used
                     for machine learning experiments.
                 </p>
             </div>
@@ -66,12 +66,12 @@ export default function Download() {
             <div className="download-card">
 
                 <h2>
-                    Full miRNA Dataset
+                    Sample miRNA Dataset
                 </h2>
 
                 <p>
-                    This download contains all miRNA
-                    samples, labels, identifiers,
+                    This download contains a sample of miRNA
+                    labels, identifiers,
                     and extracted biological features.
                 </p>
 
