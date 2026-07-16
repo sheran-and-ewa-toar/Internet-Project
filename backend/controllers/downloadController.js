@@ -1,5 +1,4 @@
 const Papa = require("papaparse");
-const { error, successWithFile } = require("../utils/responseHelpers");
 
 const {
     MiRnaData,
@@ -8,6 +7,15 @@ const {
 
 const downloadDataset = async (req, res) => {
     try {
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=mirna_dataset.csv"
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "text/csv"
+        );
 
         const mirnas = await MiRnaData.findAll({
             include: [
@@ -23,7 +31,9 @@ const downloadDataset = async (req, res) => {
             order: [["id", "ASC"]]
         });
 
-        const dataset = mirnas.map(mirna => {
+        let headersWritten = false;
+
+        for (const mirna of mirnas) {
             const row = {
                 id: mirna.id,
                 mirbase_id: mirna.mirbase_id,
@@ -36,26 +46,32 @@ const downloadDataset = async (req, res) => {
                     feature.featureValue;
             });
 
-            return row;
-        });
+            const csvRow = Papa.unparse(
+                [row],
+                {
+                    header: !headersWritten
+                }
+            );
 
-        const csvContent = Papa.unparse(dataset);
-        return successWithFile(res, csvContent, "mirna_dataset.csv");
+            res.write(csvRow);
+            headersWritten = true;
+        }
+
+        res.end();
 
     } catch (err) {
-        
-        res.removeHeader('Content-Disposition');
-        res.setHeader('Content-Type', 'application/json');
-
-        return res.status(500).json(
-            error(
-                "INTERNAL_ERROR",
-                err.message
-            )
+        console.error(
+            "Dataset download failed:",
+            err
         );
-    }
-};
 
-module.exports = {
-    downloadDataset
+        if (!res.headersSent) {
+            return res.status(500).json(
+                error(
+                    "INTERNAL_ERROR",
+                    err.message
+                )
+            );
+        }
+    }
 };
