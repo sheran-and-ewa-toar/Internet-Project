@@ -20,7 +20,11 @@ const explainJob = async (req, res) => {
             `- Recall: ${metrics.recall ?? 'n/a'}`,
             `- F1 Score: ${metrics.f1Score ?? 'n/a'}`,
             `- Cross-validation Mean: ${metrics.cv_mean ?? 'n/a'}`,
-            'Provide a concise explanation in exactly three sentences that highlights whether the model is robust, reliable, and suitable for downstream genomic or molecular classification use cases.'
+            '',
+            'Provide a structured, highly scannable analysis formatted EXACTLY like this:',
+            'VERDICT: [One short sentence summarizing if the model is suitable/unsuitable for downstream genomic use]',
+            'PROS: [One short sentence highlighting the strongest performance metric]',
+            'CONS: [One short sentence explaining the main performance bottleneck or reliability risk]'
         ].join(' ');
 
         

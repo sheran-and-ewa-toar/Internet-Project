@@ -1,3 +1,4 @@
+/* --- Table Status Badges --- */
 .status-badge {
     color: white;
     padding: 3px 8px;
@@ -28,9 +29,114 @@ td {
     vertical-align: middle;
 }
 
-.delete-btn svg {
-    width: 16px;
-    height: 16px;
-    stroke: currentColor;
+
+.row-action-container {
+    position: relative;
+    padding: 12px 38px; 
+    text-align: center;
+    vertical-align: middle;
+    min-width: 100px;
+}
+
+
+.cell-value {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+/* Invisible full-cell overlay that positions our action buttons */
+/* .row-action-menu-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+} */
+
+.row-action-trigger {
+    pointer-events: auto;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    transform: None;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin: 0;
+    
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+    z-index: 10;
+}
+
+.row-action-trigger:hover {
+    color: #0f172a !important;
+    transform: translateY(-10%) scale(1.15);
+}
+
+.row-action-dots {
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
+}
+
+
+.row-action-dropdown {
+    pointer-events: auto;
+    position: absolute;
+    right: 6px;
+    top: 34px; 
+    width: 180px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 6px;
+    z-index: 50;
+}
+
+.row-action-button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #334155;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s ease;
+}
+
+.row-action-button:hover:not(:disabled) {
+    background: #f1f5f9;
+}
+
+.row-action-button svg {
+    width: 14px;
+    height: 14px;
+    stroke: #64748b;
     fill: none;
+}
+
+.row-action-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.row-action-icon {
+    font-size: 1rem;
 }

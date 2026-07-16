@@ -32,10 +32,10 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.ai-toggle-btn:active:not(:disabled) {
+/* .ai-toggle-btn:active:not(:disabled) {
     transform: translateY(0);
     background: var(--border);
-}
+} */
 
 .ai-toggle-btn:disabled {
     background: var(--surface-alt);
@@ -59,59 +59,107 @@
     line-height: 1.4;
 }
 
+@keyframes aiPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* --- The AI Sparkle "Bulb" Trigger & Hover Box --- */
 .ai-hover-wrapper {
-    position: relative;
+    pointer-events: auto;
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
     display: inline-flex;
+    align-items: center;
     justify-content: center;
+    z-index: 20;
 }
 
 .ai-hover-trigger {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: #2f4f4f;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 1.1rem;
+    color: #3b82f6;
     cursor: help;
-    font-weight: 600;
-    padding: 6px 10px;
-    border: 1px solid #c8d8c8;
-    border-radius: 999px;
-    background: #f5fbf4;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
 
+.ai-hover-trigger:hover {
+    transform: scale(1.25);
+    color: #2563eb;
+}
+
+/* --- Floating AI Text Card  */
 .ai-result {
     position: absolute;
-    z-index: 10;
-    top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    min-width: 220px;
-    max-width: 280px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #f9fcf8;
-    border: 1px solid #cfe2d0;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    bottom: 24px;
+    right: 0;
+    left: auto;
+    transform: translateY(4px);
+    
+    width: 340px;                
+    max-height: 260px;            
+    overflow-y: auto;
+    padding: 16px;                
+    border-radius: 12px;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 12px 20px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+    
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 100;
 }
 
-.ai-hover-wrapper:hover .ai-result,
-.ai-hover-wrapper:focus-within .ai-result {
+/* Invisible pseudo-element bridges the gap between the star trigger and the floating card so the mouse doesn't "lose" the hover state when moving up. */
+.ai-result::after {
+    content: '';
+    position: absolute;
+    bottom: -24px;
+    left: 0;
+    width: 100%;
+    height: 24px;
+    background: transparent;
+}
+
+
+.ai-hover-wrapper:hover .ai-result {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
 }
+
 
 .ai-result p {
     margin: 0;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: #4b5563;
+    font-size: 0.85rem;           
+    line-height: 1.6;  
+    color: #334155;
+    text-align: left;
+    font-weight: 400;
+    white-space: pre-line;
 }
 
-@keyframes aiPulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
+
+.ai-result::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-result::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ai-result::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+}
+
+.ai-result::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
 }
