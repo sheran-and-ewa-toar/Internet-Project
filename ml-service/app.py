@@ -15,7 +15,7 @@ from models.common import (
 from models.rf import train_rf
 from models.xgb import train_xgb
 
-NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL", "http://localhost:3000")
+NODE_BACKEND_URL = os.getenv("NODE_BACKEND_URL")
 
 
 class TrainRequest(BaseModel):
