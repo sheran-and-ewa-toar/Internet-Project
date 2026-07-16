@@ -5,7 +5,9 @@ import '../styles/aiInsights.css';
 export default function RowActionMenu({ job, onDeleteClick }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [explanation, setExplanation] = useState('');
+    const [explanation, setExplanation] = useState(() => {
+        return sessionStorage.getItem(`ai_explain_${job.jobId}`) || '';
+        });
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -23,23 +25,42 @@ export default function RowActionMenu({ job, onDeleteClick }) {
 
     const handleGenerateAI = async () => {
         setOpen(false);
+
+        if (job.status !== "completed") {
+        alert("AI analysis is only available for successfully completed jobs.");
+        return;
+        }
+
+        /* if we already cached results for this job, use them instead of making a new request */
+        const cachedExplanation = sessionStorage.getItem(`ai_explain_${job.jobId}`);
+        if (cachedExplanation) {
+            setExplanation(cachedExplanation);
+            return;
+        }
+
         setLoading(true);
         setExplanation('');
 
-        const result = await fetchJobExplanation(job);
+        try {
+            const result = await fetchJobExplanation(job);
 
-        if (result?.explanation) {
-            setExplanation(result.explanation);
-        }
-        else {
+            if (result?.explanation) {
+                setExplanation(result.explanation);
+                sessionStorage.setItem(`ai_explain_${job.jobId}`, result.explanation);
+            }
+            else {
             alert("The AI helper is currently busy. Please try generating the performance analysis again in a later time.");
+            }
+        } catch (error) {
+            console.error("Error fetching job explanation:", error);
         }
-
-        setLoading(false);
+        finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="row-action-menu" ref={menuRef}>
+        <div className="row-action-menu-overlay" ref={menuRef}>
             {!open && explanation && (
             <div className="ai-hover-wrapper">
                 <span className="ai-hover-trigger" title="AI Insight Available">✦</span>
@@ -86,9 +107,10 @@ export default function RowActionMenu({ job, onDeleteClick }) {
                     <button
                         className="row-action-button"
                         type="button"
+                        disabled={loading || job.status !== "completed"}
                         onClick={handleGenerateAI}
                         disabled={loading}
-                    >
+                    >   
                         <span className="row-action-icon" aria-hidden="true">✦</span>
                         {loading ? 'Generating AI...' : 'Generate AI'}
                     </button>
