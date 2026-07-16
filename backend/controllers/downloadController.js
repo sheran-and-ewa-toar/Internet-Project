@@ -75,3 +75,7 @@ const downloadDataset = async (req, res) => {
         }
     }
 };
+
+module.exports = {
+    downloadDataset
+};
