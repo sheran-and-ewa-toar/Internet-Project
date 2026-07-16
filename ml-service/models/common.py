@@ -9,10 +9,17 @@ import os
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="../backend/config/.env")
 
+load_dotenv()
 
-DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+# 2. Extract database configurations directly from the environment variables
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT', '3306') # Defaults to standard MySQL port
+DB_NAME = os.getenv('DB_NAME')
+
+DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Build connection pool config for Pandas execution mapping
 engine = create_engine(
