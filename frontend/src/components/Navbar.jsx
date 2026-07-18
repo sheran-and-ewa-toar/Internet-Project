@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import api from "../services/api";
 import "../styles/Navbar.css";
 
@@ -58,15 +58,13 @@ export default function Navbar({ user: propUser, setUser: propSetUser }) {
             </div>
 
             <div className="navbar-center">
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/about">About</Link>
-                <Link to="/create-job" className="new-job-link">
-                    New Job
-                </Link>
-                <Link to="/download">Download</Link>
-                <Link to="/settings">Settings</Link>
+                <NavLink to="/dashboard">Dashboard</NavLink>
+                <NavLink to="/about">About</NavLink>
+                <NavLink to="/create-job"> New Job </NavLink>
+                <NavLink to="/download">Download</NavLink>
+                <NavLink to="/settings">Settings</NavLink>
                 {user?.userRole === "admin" && (
-                    <Link to="/users">Users</Link>
+                    <NavLink to="/users">Users</NavLink>
                 )}
             </div>
 
