@@ -9,7 +9,6 @@ import os
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 # 2. Extract database configurations directly from the environment variables

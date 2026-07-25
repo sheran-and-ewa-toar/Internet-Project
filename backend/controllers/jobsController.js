@@ -2,7 +2,7 @@ const { success, error } = require('../utils/responseHelpers');
 const { Job, User, FeatureFilter, JobFilter, sequelize } = require('../models');
 const axios = require("axios");
 
-const FASTAPI_URL = process.env.FASTAPI_SERVICE_URL;
+const FASTAPI_URL = process.env.FASTAPI_SERVICE_URL || "http://localhost:8000";
 
 const FEATURE_SET_MAP = {
     1: "1d",

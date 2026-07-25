@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const dotenv = require('dotenv');
+const path = require('path');
 
 const app = express();
 
@@ -20,8 +22,9 @@ const authMiddleware = require('./middleware/authMiddleware');
 
 app.use(express.json());
 
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 };
 

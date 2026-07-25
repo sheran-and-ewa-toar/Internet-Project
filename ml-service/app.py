@@ -1,9 +1,9 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import requests
 import os
 import traceback
-
 from feature_sets import FEATURE_SETS
 
 from models.common import (
@@ -15,7 +15,7 @@ from models.common import (
 from models.rf import train_rf
 from models.xgb import train_xgb
 
-REACT_APP_BACKEND_URL = os.getenv("REACT_APP_BACKEND_URL")
+REACT_APP_BACKEND_URL = os.getenv("REACT_APP_BACKEND_URL", "http://localhost:3000")
 
 
 class TrainRequest(BaseModel):
