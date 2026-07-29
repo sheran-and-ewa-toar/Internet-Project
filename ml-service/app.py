@@ -34,6 +34,10 @@ class TrainRequest(BaseModel):
 
 
 app = FastAPI()
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 
 @app.post("/train")
 def train(job: TrainRequest,background_tasks: BackgroundTasks):
