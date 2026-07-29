@@ -17,9 +17,16 @@ async function wakeMicroservice() {
             console.log("ML microservice is awake.");
             return true;
         } catch (err) {
-            console.log(`Microservice not ready at ${FASTAPI_URL} (${attempt}/${maxAttempts})...`);
-            await new Promise(resolve => setTimeout(resolve, 3000));
+        console.log("Wake error:", err.code);
+        console.log("Message:", err.message);
+
+        if (err.response) {
+            console.log("Status:", err.response.status);
+            console.log("Headers:", err.response.headers);
+            console.log("Body:", err.response.data);
         }
+
+        throw err;}
     }
 
     throw new Error("Unable to wake ML microservice.");
