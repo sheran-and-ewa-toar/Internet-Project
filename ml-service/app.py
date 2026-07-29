@@ -34,9 +34,15 @@ class TrainRequest(BaseModel):
 
 
 app = FastAPI()
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@app.get("/")
+def root():
+    return {
+        "success": True,
+        "data": {
+            "status": "ML Service is healthy and running"
+        },
+        "error": None
+    }
 
 
 @app.post("/train")

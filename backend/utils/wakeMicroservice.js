@@ -10,7 +10,7 @@ async function wakeMicroservice() {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            await axios.get(`${FASTAPI_URL}/`, {
+            await axios.get(FASTAPI_URL, {
                 timeout: 10000,
             });
 
