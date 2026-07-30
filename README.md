@@ -128,8 +128,8 @@ PORT=3000
 
 FASTAPI_SERVICE_URL=http://localhost:8000
 REACT_APP_BACKEND_URL=http://localhost:3000
-
-INTERNAL_API_SECRET=
+NODE_BACKEND_URL=http://localhost:3000
+FRONTEND_URL=
 GEMINI_API_KEY=
 ```
 
@@ -139,7 +139,7 @@ Example:
 
 ```env
 PORT=5173
-BACKEND_URL=http://localhost:3000
+NODE_BACKEND_URL=http://localhost:3000
 ```
 
 
