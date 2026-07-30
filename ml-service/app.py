@@ -34,7 +34,7 @@ class TrainRequest(BaseModel):
 
 
 app = FastAPI()
-@app.get("/", methods=["GET", "HEAD"])
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {
         "success": True,
