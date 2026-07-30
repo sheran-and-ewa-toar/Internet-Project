@@ -1,32 +1,37 @@
-const axios = require("axios");
-
 const FASTAPI_URL =
     process.env.FASTAPI_SERVICE_URL || "http://localhost:8000";
 
 async function wakeMicroservice() {
     console.log("Checking ML microservice...");
 
-    const maxAttempts = 10;
+    const maxAttempts = 30;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            await axios.get(FASTAPI_URL, {
-                timeout: 10000,
+            const response = await fetch(FASTAPI_URL, {
+                method: "GET",
+                headers: {
+                    "User-Agent": "MLSandbox-Backend-Wakeup",
+                    "Accept": "application/json"
+                }
             });
 
-            console.log("ML microservice is awake.");
-            return true;
-        } catch (err) {
-        console.log("Wake error:", err.code);
-        console.log("Message:", err.message);
+            if (response.ok) {
+                console.log("ML microservice is awake.");
+                return true;
+            }
 
-        if (err.response) {
-            console.log("Status:", err.response.status);
-            console.log("Headers:", err.response.headers);
-            console.log("Body:", err.response.data);
+            console.log(
+                `Attempt ${attempt}/${maxAttempts}: HTTP ${response.status}`
+            );
+        } catch (err) {
+            console.log(
+                `Attempt ${attempt}/${maxAttempts}: ${err.message}`
+            );
         }
 
-        throw err;}
+        // Wait 3 seconds before retrying.
+        await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     throw new Error("Unable to wake ML microservice.");
