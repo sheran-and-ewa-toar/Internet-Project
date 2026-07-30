@@ -1,6 +1,7 @@
 const { success, error } = require('../utils/responseHelpers');
 const { Job, User, FeatureFilter, JobFilter, sequelize } = require('../models');
 const axios = require("axios");
+const { wakeMicroservice } = require("../utils/wakeMicroservice");
 
 const FASTAPI_URL = process.env.FASTAPI_SERVICE_URL || "http://localhost:8000";
 
@@ -210,6 +211,9 @@ const createJob = async (req, res) => {
         // Update row status internally to 'running'
         await job.update({ status: "running", updateDate: new Date() });
         io.emit("job_status_changed", { jobId: job.jobId, status: "running" });
+
+        // Ensure the ML service is awake before sending the training request
+        await wakeMicroservice();
 
         // send asynchronous transaction payload to microRNA training backend
         axios.post(`${FASTAPI_URL}/train`, {

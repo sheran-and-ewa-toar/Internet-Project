@@ -34,6 +34,16 @@ class TrainRequest(BaseModel):
 
 
 app = FastAPI()
+@app.get("/")
+def root():
+    return {
+        "success": True,
+        "data": {
+            "status": "ML Service is healthy and running"
+        },
+        "error": None
+    }
+
 
 @app.post("/train")
 def train(job: TrainRequest,background_tasks: BackgroundTasks):

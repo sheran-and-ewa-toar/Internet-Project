@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const path = require('path');
+const { wakeMicroservice } = require("./utils/wakeMicroservice");
 
 const app = express();
 
@@ -66,6 +67,12 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
     try {
         await connectDatabase();
+
+    try {
+        await wakeMicroservice();
+    } catch (err) {
+        console.warn("Failed to warm up ML microservice:", err.message);
+    }
 
         server.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
