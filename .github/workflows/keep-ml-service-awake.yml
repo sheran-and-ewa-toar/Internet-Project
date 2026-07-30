@@ -12,7 +12,7 @@ jobs:
       - name: Ping ML service health endpoint
         run: |
           echo "Pinging ML service..."
-          status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.ML_SERVICE_URL }}/health")
+          status=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.ML_SERVICE_URL }}")
           echo "Response status: $status"
           if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
             echo "Non-2xx response ($status) — service may still be waking up, that's fine."
